@@ -31,6 +31,9 @@ class People
     #[ORM\Column(type: 'string', length: 13)]
     private $phone;
 
+    #[ORM\OneToOne(mappedBy: 'people', targetEntity: Employee::class, cascade: ['persist', 'remove'])]
+    private $employee;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -104,6 +107,23 @@ class People
     public function setPhone(string $phone): self
     {
         $this->phone = $phone;
+
+        return $this;
+    }
+
+    public function getEmployee(): ?Employee
+    {
+        return $this->employee;
+    }
+
+    public function setEmployee(Employee $employee): self
+    {
+        // set the owning side of the relation if necessary
+        if ($employee->getPeople() !== $this) {
+            $employee->setPeople($this);
+        }
+
+        $this->employee = $employee;
 
         return $this;
     }
