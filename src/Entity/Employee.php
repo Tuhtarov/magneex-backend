@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\EmployeeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EmployeeRepository::class)]
@@ -19,6 +21,14 @@ class Employee
 
     #[ORM\ManyToOne(targetEntity: Role::class, inversedBy: 'employees')]
     private $role;
+
+    #[ORM\ManyToMany(targetEntity: Visit::class, mappedBy: 'employee')]
+    private $visits;
+
+    public function __construct()
+    {
+        $this->visits = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -45,6 +55,33 @@ class Employee
     public function setRole(?Role $role): self
     {
         $this->role = $role;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Visit[]
+     */
+    public function getVisits(): Collection
+    {
+        return $this->visits;
+    }
+
+    public function addVisit(Visit $visit): self
+    {
+        if (!$this->visits->contains($visit)) {
+            $this->visits[] = $visit;
+            $visit->addEmployee($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVisit(Visit $visit): self
+    {
+        if ($this->visits->removeElement($visit)) {
+            $visit->removeEmployee($this);
+        }
 
         return $this;
     }

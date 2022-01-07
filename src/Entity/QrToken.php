@@ -16,6 +16,9 @@ class QrToken
     #[ORM\Column(type: 'string', length: 255)]
     private $token;
 
+    #[ORM\OneToOne(mappedBy: 'qrToken', targetEntity: Visit::class, cascade: ['persist', 'remove'])]
+    private $visit;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -29,6 +32,28 @@ class QrToken
     public function setToken(string $token): self
     {
         $this->token = $token;
+
+        return $this;
+    }
+
+    public function getVisit(): ?Visit
+    {
+        return $this->visit;
+    }
+
+    public function setVisit(?Visit $visit): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($visit === null && $this->visit !== null) {
+            $this->visit->setQrToken(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($visit !== null && $visit->getQrToken() !== $this) {
+            $visit->setQrToken($this);
+        }
+
+        $this->visit = $visit;
 
         return $this;
     }
