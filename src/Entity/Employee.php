@@ -25,6 +25,9 @@ class Employee
     #[ORM\ManyToMany(targetEntity: Visit::class, mappedBy: 'employee')]
     private $visits;
 
+    #[ORM\OneToOne(mappedBy: 'employee', targetEntity: User::class, cascade: ['persist', 'remove'])]
+    private $user;
+
     public function __construct()
     {
         $this->visits = new ArrayCollection();
@@ -82,6 +85,23 @@ class Employee
         if ($this->visits->removeElement($visit)) {
             $visit->removeEmployee($this);
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(User $user): self
+    {
+        // set the owning side of the relation if necessary
+        if ($user->getEmployee() !== $this) {
+            $user->setEmployee($this);
+        }
+
+        $this->user = $user;
 
         return $this;
     }
