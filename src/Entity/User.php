@@ -4,9 +4,12 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use JetBrains\PhpStorm\Pure;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -15,7 +18,7 @@ class User
 
     #[ORM\OneToOne(inversedBy: 'user', targetEntity: Employee::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private $employee;
+    private Employee $employee;
 
     #[ORM\Column(type: 'string', length: 255)]
     private $login;
@@ -77,5 +80,24 @@ class User
         $this->activated = $activated;
 
         return $this;
+    }
+
+    #[Pure]
+    public function getRoles(): array
+    {
+        // берём роль пользователя через сущности Employee (связана с User)
+        $roles = [$this->employee->getRole()->getName()];
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function eraseCredentials()
+    {
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->login;
     }
 }
