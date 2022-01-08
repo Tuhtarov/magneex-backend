@@ -24,7 +24,10 @@ security:
                 path: /
                 httponly: false # разрешаем обращение к серваку из под java script
             json_login:
-                check_path: api_login # api_login is a route we will create below
+                # check_path: api_login # api_login is a route we will create below
+                # что ожидается в теле json:
+                username_path: login # идентификатор пользователя
+                password_path: password # пароль прользователя (password по умолчанию)
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall

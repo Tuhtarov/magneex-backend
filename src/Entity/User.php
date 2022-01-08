@@ -87,6 +87,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // берём роль пользователя через сущности Employee (связана с User)
         $roles = [$this->employee->getRole()->getName()];
+        // роли в симфони начинаются с ROLE_ (нерушимая конвенция)
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
