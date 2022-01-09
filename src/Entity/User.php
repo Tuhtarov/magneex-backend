@@ -20,7 +20,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(nullable: false)]
     private Employee $employee;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, unique: true, nullable: false)]
     private $login;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -28,6 +28,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'boolean')]
     private $activated;
+
+    private $plainPassword;
 
     public function getId(): ?int
     {
@@ -85,8 +87,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Pure]
     public function getRoles(): array
     {
+        $roles = [];
+
         // берём роль пользователя через сущности Employee (связана с User)
-        $roles = [$this->employee->getRole()->getName()];
+        $currentRole = $this->employee->getRole()->getName();
+
+        if (!empty($currentRole)) {
+            $currentRole = 'ROLE_' . strtoupper($currentRole);
+            $roles[] = $currentRole;
+        }
+
         // роли в симфони начинаются с ROLE_ (нерушимая конвенция)
         $roles[] = 'ROLE_USER';
 
@@ -95,10 +105,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials()
     {
+        $this->plainPassword = null;
+    }
+
+    public function getSalt(): ?string
+    {
+        return null;
     }
 
     public function getUserIdentifier(): string
     {
-        return $this->login;
+        return (string) $this->login;
     }
 }

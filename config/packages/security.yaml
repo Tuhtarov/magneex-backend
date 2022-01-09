@@ -2,13 +2,14 @@ security:
     enable_authenticator_manager: true
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
+        App\Entity\User: 'auto'
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         users_in_memory: { memory: null }
         app_user_provider:
-            entity: # сущность для авторизации
-                class: App\Entity\User
+            entity:
+                class: App\Entity\User  # сущность для авторизации
                 property: login # свойство сущности, по которому будет происходить идентификация
     firewalls:
         dev:
@@ -16,15 +17,17 @@ security:
             security: false
         main:
             lazy: true
-            provider: users_in_memory
+#            provider: users_in_memory
+            provider: app_user_provider
             # pattern: ^/admin # запретить переходить на url admin не авторизованным пользователям
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 604800 # 1 week in seconds
-                path: /
+                path: /admin
                 httponly: false # разрешаем обращение к серваку из под java script
             json_login:
-                # check_path: api_login # api_login is a route we will create below
+                login_path: api_login
+                check_path: api_login # api_login is a route we will create below
                 # что ожидается в теле json:
                 username_path: login # идентификатор пользователя
                 password_path: password # пароль прользователя (password по умолчанию)
@@ -38,8 +41,11 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS } # публичный доступ (зарезервированная роль)
+        - { path: ^/api/registration, roles: PUBLIC_ACCESS } # только админ
+        - { path: ^/api/admin, roles: ROLE_ADMIN } # только админ
+        - { path: ^/hello, roles: ROLE_USER } # только админ
+        - { path: ^/api/user, roles: ROLE_USER } # пользователь
 
 when@test:
     security:
