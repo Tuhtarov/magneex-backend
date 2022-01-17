@@ -127,4 +127,20 @@ class People
 
         return $this;
     }
+
+    /**
+     * Получить ассоциативный массив, представляющий данные человека
+     * @return array
+     */
+    public function getAssocData(): array
+    {
+        return [
+            'name' => $this->name,
+            'family' => $this->family,
+            'patronymic' => $this->patronymic,
+            'birthday' => $this->birthday,
+            'email' => $this->email,
+            'phone' => $this->phone
+        ];
+    }
 }

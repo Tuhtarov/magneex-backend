@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Role;
 use App\Entity\User;
-use http\Message\Body;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,25 +21,25 @@ class ApiLoginController extends AbstractController
         $this->tokenGenerator = $tokenGenerator;
     }
 
-    #[Route('/api/login', name: 'api_login', methods: ['POST'])]
-    public function index(#[CurrentUser] ?User $user): Response
-    {
-//        if ($user === null) {
+//    #[Route('/api/login', name: 'api_login', methods: ['POST'])]
+//    public function index(): Response
+//    {
+//        $user = $this->getUser();
+//
+//        if (!$user) {
 //            return $this->json([
-//                'message' => 'Missing credentials in body request',
+//                'message' => 'Not authorized'
 //            ], Response::HTTP_UNAUTHORIZED);
 //        }
 //
-
-        dump($this->getUser());
-        die();
-        return $this->json([
-            'user' => 'hello'
-        ]);
-//
-//        return $this->json([
-//            'user' => $user->getUserIdentifier(),
-//            'token' => $this->tokenGenerator->generateToken(),
-//        ], Response::HTTP_ACCEPTED);
-    }
+//        if ($user instanceof User) {
+//            return $this->json([
+//                'token' => $this->tokenGenerator->generateToken(),
+//            ], Response::HTTP_OK);
+//        } else {
+//            return $this->json([
+//                'message' => 'Server error on Login Api'
+//            ], Response::HTTP_I_AM_A_TEAPOT);
+//        }
+//    }
 }

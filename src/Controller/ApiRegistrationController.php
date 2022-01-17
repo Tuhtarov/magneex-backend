@@ -51,19 +51,6 @@ class ApiRegistrationController extends AbstractController
         ], Response::HTTP_CREATED);
     }
 
-
-    #[Route('/test', name: 'test', methods: ['POST'])]
-    public function test(): Response
-    {
-        dump($this->getUser());
-        die();
-
-        return $this->json([
-            'hello' => 'he'
-        ]);
-    }
-
-
     /**
      * Получить данные json из запроса.
      * @param Request $request
