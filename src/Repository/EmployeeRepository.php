@@ -3,8 +3,13 @@
 namespace App\Repository;
 
 use App\Entity\Employee;
+use App\Entity\JobPosition;
+use App\Entity\People;
+use App\Entity\Role;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Form\FormInterface;
 
 /**
  * @method Employee|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,37 +19,54 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class EmployeeRepository extends ServiceEntityRepository
 {
+    private Employee $employee;
+    private EntityManagerInterface $manager;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Employee::class);
     }
 
-    // /**
-    //  * @return Employee[] Returns an array of Employee objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function createEmployee(People $people): self
     {
-        return $this->createQueryBuilder('e')
-            ->andWhere('e.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('e.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        $employee = new Employee();
 
-    /*
-    public function findOneBySomeField($value): ?Employee
-    {
-        return $this->createQueryBuilder('e')
-            ->andWhere('e.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $employee->setPeople($people);
+
+        $this->employee = $employee;
+
+        return $this;
     }
-    */
+
+    public function setRole(?Role $role): self
+    {
+        $this->employee->setRole($role);
+        return $this;
+    }
+
+    public function setJobPosition(?JobPosition $jobPosition): self
+    {
+        $this->employee->setJobPosition($jobPosition);
+        return $this;
+    }
+
+    public function persist(EntityManagerInterface $manager): self
+    {
+        $this->manager = $manager;
+        $this->manager->persist($this->employee);
+
+        return $this;
+    }
+
+    public function save()
+    {
+        $this->manager->flush();
+    }
+
+
+
+    public function getEntity(): Employee
+    {
+        return $this->employee;
+    }
 }

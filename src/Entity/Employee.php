@@ -28,6 +28,12 @@ class Employee
     #[ORM\OneToOne(mappedBy: 'employee', targetEntity: User::class, cascade: ['persist', 'remove'])]
     private $user;
 
+    #[ORM\ManyToOne(targetEntity: JobPosition::class, inversedBy: 'employees')]
+    private $jobPosition;
+
+    public const JOB_POSITION_FK_NAME = 'job_position_id';
+    public const ROLE_FK_NAME = 'role_id';
+
     public function __construct()
     {
         $this->visits = new ArrayCollection();
@@ -102,6 +108,18 @@ class Employee
         }
 
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getJobPosition(): ?JobPosition
+    {
+        return $this->jobPosition;
+    }
+
+    public function setJobPosition(?JobPosition $jobPosition): self
+    {
+        $this->jobPosition = $jobPosition;
 
         return $this;
     }

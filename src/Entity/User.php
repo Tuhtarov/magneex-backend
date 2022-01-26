@@ -89,7 +89,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = [];
 
-        // берём роль пользователя через сущности Employee (связана с User)
+        // берём роль пользователя через Employee (связана с User)
         $currentRole = $this->employee->getRole()->getName();
 
         if (!empty($currentRole)) {

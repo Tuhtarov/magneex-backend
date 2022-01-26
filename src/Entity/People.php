@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PeopleRepository;
+use Cassandra\Date;
+use Doctrine\DBAL\Types\DateType;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PeopleRepository::class)]
@@ -134,13 +136,16 @@ class People
      */
     public function getAssocData(): array
     {
+        $date = $this->getBirthday()->format('Y-m-d');
+
         return [
-            'name' => $this->name,
-            'family' => $this->family,
-            'patronymic' => $this->patronymic,
-            'birthday' => $this->birthday,
-            'email' => $this->email,
-            'phone' => $this->phone
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'family' => $this->getFamily(),
+            'patronymic' => $this->getPatronymic(),
+            'birthday' => $date,
+            'email' => $this->getEmail(),
+            'phone' => $this->getPhone()
         ];
     }
 }
