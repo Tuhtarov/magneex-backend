@@ -63,8 +63,6 @@ class EmployeeRepository extends ServiceEntityRepository
         $this->manager->flush();
     }
 
-
-
     public function getEntity(): Employee
     {
         return $this->employee;

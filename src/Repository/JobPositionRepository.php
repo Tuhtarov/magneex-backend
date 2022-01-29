@@ -19,6 +19,27 @@ class JobPositionRepository extends ServiceEntityRepository
         parent::__construct($registry, JobPosition::class);
     }
 
+    public function firstOrCreate(string $name): JobPosition
+    {
+        $position = $this->findBy(['name' => $name]);
+
+        if (!$position) {
+            $position = $this->create($name);
+        }
+
+        return $position;
+    }
+
+    private function create(string $name): JobPosition
+    {
+        $position = new JobPosition();
+        $position->setName($name);
+
+        $this->getEntityManager()->persist($position);
+        $this->getEntityManager()->flush($position);
+
+        return $position;
+    }
     // /**
     //  * @return JobPosition[] Returns an array of JobPosition objects
     //  */

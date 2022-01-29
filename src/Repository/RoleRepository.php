@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Role;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -19,6 +20,16 @@ class RoleRepository extends ServiceEntityRepository
         parent::__construct($registry, Role::class);
     }
 
+    public function create(string $name): Role
+    {
+        $role = new Role();
+        $role->setName($name);
+
+        $this->getEntityManager()->persist($role);
+        $this->getEntityManager()->flush($role);
+
+        return $role;
+    }
 
     // /**
     //  * @return Role[] Returns an array of Role objects

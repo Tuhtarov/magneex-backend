@@ -3,9 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\JobPosition;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,7 +19,7 @@ class JobPositionController extends AbstractApiController
     }
 
     #[Route('/', name: 'get_all')]
-    public function index(Request $request): Response
+    public function index(): Response
     {
         $positions = $this->manager->getRepository(JobPosition::class)->findAll();
 
@@ -35,6 +33,14 @@ class JobPositionController extends AbstractApiController
     #[Route('/create', name: 'create')]
     public function create(Request $request): Response
     {
-        return $this->respond(['all god']);
+        $name = $request->request->get('name') ?? null;
+
+        if (empty($name)) {
+            return $this->respond(['Name is empty'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $position = $this->manager->getRepository(JobPosition::class)->firstOrCreate($name);
+
+        return $this->respond(['job_position' => $position], Response::HTTP_CREATED);
     }
 }

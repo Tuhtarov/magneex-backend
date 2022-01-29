@@ -5,8 +5,10 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JetBrains\PhpStorm\Pure;
+use JMS\Serializer\Annotation\Exclude;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -24,6 +26,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $login;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Exclude]
     private $password;
 
     #[ORM\Column(type: 'boolean')]
