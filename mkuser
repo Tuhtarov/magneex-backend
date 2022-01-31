@@ -1,0 +1,35 @@
+#!/bin/bash
+
+login="admin"
+password="admin"
+
+# result=$(echo "select * from people" | mariadb -u"$user" -p"$pwd" visits)
+# echo "insert into  ();" | mariadb -u"$user" -p"$pwd" visits
+
+# пароль, сгенерированный утилитой 'php bin/console security:hash admin' для сущности App\Entity\User
+generatedPWD="\$2y\$13\$wQ0BRWfMNdRl0CfmXyWeZ.HqFAOKXQpOsEOZtEt3FN3QelcrmA0JK"
+
+# человек
+peopleSQL="insert into people (name, family, patronymic, email, phone, birthday) values ('Александр', 'Тухтаров', 'Анатольевич', 'stuxtarov@mail.ru', '89233987519', '2001-12-25');"
+
+# роли
+roleSQL="insert into role (name) values ('admin'), ('user');"
+
+# должности
+jobPositionSQL="insert into job_position (name) values ('Тех лид'), ('Сис админ'), ('Дизайнер'), ('Веб мастер');"
+
+# сотрудник
+employeeSQL="insert into employee (people_id, role_id, job_position_id) values ('1', '1', '1');"
+
+# пользователь
+userSQL="insert into user (employee_id, login, password, activated) values ('1', 'admin', '$generatedPWD', '1');"
+
+# пз, первая-вторая глава, программный продукт
+
+echo "$peopleSQL" | mariadb -u"$login" -p"$password" visits
+echo "$roleSQL" | mariadb -u"$login" -p"$password" visits
+echo "$jobPositionSQL" | mariadb -u"$login" -p"$password" visits
+echo "$employeeSQL" | mariadb -u"$login" -p"$password" visits
+echo "$userSQL" | mariadb -u"$login" -p"$password" visits
+
+exit 0
