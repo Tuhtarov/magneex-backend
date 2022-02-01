@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Service\UserFetcherForResponse;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,7 +58,11 @@ class UserController extends AbstractApiController
             return $this->respond(['message' => 'In body don`t exist "user" key'], Response::HTTP_BAD_REQUEST);
         }
 
-        $user = $this->doctrine->getRepository(User::class)->create($userData);
+        try {
+            $user = $this->doctrine->getRepository(User::class)->create($userData);
+        } catch (UniqueConstraintViolationException $exception) {
+            return $this->respond(['message' => 'Duplicate key'],Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
 
         if ($user) {
             return $this->respond(['user' => $user]);
