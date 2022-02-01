@@ -21,7 +21,7 @@ class JobPositionRepository extends ServiceEntityRepository
 
     public function firstOrCreate(string $name): JobPosition
     {
-        $position = $this->findBy(['name' => $name]);
+        $position = $this->findOneBy(['name' => $name]);
 
         if (!$position) {
             $position = $this->create($name);

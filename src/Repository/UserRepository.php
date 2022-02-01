@@ -35,8 +35,10 @@ class UserRepository extends ServiceEntityRepository
 
         if ($employee) {
             $user = new User();
-            $user->setLogin($data['login'])->setEmployee($employee)
-                ->setActivated(!!$data['activated'] ?? true);
+            $user->setLogin($data['login'])->setEmployee($employee);
+
+            $activateValue = isset($data['activated']) && ($data['activated'] === true || $data['activated'] === 'true');
+            $user->setActivated($activateValue);
 
             $this->setPassword($user, $data['password']);
 

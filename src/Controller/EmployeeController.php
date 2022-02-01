@@ -119,10 +119,13 @@ class EmployeeController extends AbstractApiController
             } catch (\Exception $e) {
                 return $this->respond(['message' => 'runtime error'], Response::HTTP_I_AM_A_TEAPOT);
             }
-
         }
 
-        return $this->respond($form, Response::HTTP_BAD_REQUEST);
+        $errors = $form->getErrors();
+
+        return $this->respond([
+            'errors' => $errors,
+        ], Response::HTTP_BAD_REQUEST);
     }
 
     private function getRoleFromRequest(Request $request): ?Role

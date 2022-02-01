@@ -41,6 +41,6 @@ class JobPositionController extends AbstractApiController
 
         $position = $this->manager->getRepository(JobPosition::class)->firstOrCreate($name);
 
-        return $this->respond(['job_position' => $position], Response::HTTP_CREATED);
+        return $this->respond(['jobPosition' => $position], Response::HTTP_CREATED);
     }
 }
