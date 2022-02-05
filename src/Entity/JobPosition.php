@@ -16,6 +16,9 @@ class JobPosition
     #[ORM\Column(type: 'string', length: 255)]
     private $name;
 
+    #[ORM\OneToMany(mappedBy: 'jobPosition', targetEntity: Employee::class)]
+    private $employees;
+
     public function getId(): ?int
     {
         return $this->id;

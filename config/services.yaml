@@ -4,6 +4,11 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    centrifugo.api_key: '%env(resolve:CENTRIFUGO_API_KEY)%'
+    centrifugo.hmac_key: '%env(resolve:CENTRIFUGO_TOKEN_HMAC_KEY)%'
+    centrifugo.host_api: '%env(resolve:CENTRIFUGO_HOST_API)%'
+    centrifugo.host_subscribe: '%env(resolve:CENTRIFUGO_HOST_SUBSCRIBE)%'
+    centrifugo.channel: '%env(resolve:CENTRIFUGO_QR_CHANNEL)%'
 
 services:
     # default configuration for services in *this* file

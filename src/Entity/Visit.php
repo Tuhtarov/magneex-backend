@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\VisitRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VisitRepository::class)]
@@ -15,84 +13,47 @@ class Visit
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\ManyToMany(targetEntity: Employee::class, inversedBy: 'visits')]
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private $begin_work_time;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private $end_work_time;
+
+    #[ORM\ManyToOne(targetEntity: Employee::class, inversedBy: 'visits')]
     private $employee;
 
-    #[ORM\OneToOne(inversedBy: 'visit', targetEntity: QrToken::class, cascade: ['persist', 'remove'])]
-    private $qrToken;
-
-    #[ORM\Column(type: 'datetime')]
-    private $dateBeginWork;
-
-    #[ORM\Column(type: 'datetime')]
-    private $dateEndWork;
-
-    public function __construct()
+    public function getBeginWorkTime(): ?\DateTimeInterface
     {
-        $this->employee = new ArrayCollection();
+        return $this->begin_work_time;
     }
 
-    public function getId(): ?int
+    public function setBeginWorkTime(?\DateTimeInterface $begin_work_time): self
     {
-        return $this->id;
+        $this->begin_work_time = $begin_work_time;
+
+        return $this;
     }
 
-    /**
-     * @return Collection|Employee[]
-     */
-    public function getEmployee(): Collection
+    public function getEndWorkTime(): ?\DateTimeInterface
+    {
+        return $this->end_work_time;
+    }
+
+    public function setEndWorkTime(?\DateTimeInterface $end_work_time): self
+    {
+        $this->end_work_time = $end_work_time;
+
+        return $this;
+    }
+
+    public function getEmployee(): ?Employee
     {
         return $this->employee;
     }
 
-    public function addEmployee(Employee $employee): self
+    public function setEmployee(?Employee $employee): self
     {
-        if (!$this->employee->contains($employee)) {
-            $this->employee[] = $employee;
-        }
-
-        return $this;
-    }
-
-    public function removeEmployee(Employee $employee): self
-    {
-        $this->employee->removeElement($employee);
-
-        return $this;
-    }
-
-    public function getQrToken(): ?QrToken
-    {
-        return $this->qrToken;
-    }
-
-    public function setQrToken(?QrToken $qrToken): self
-    {
-        $this->qrToken = $qrToken;
-
-        return $this;
-    }
-
-    public function getDateBeginWork(): ?\DateTimeInterface
-    {
-        return $this->dateBeginWork;
-    }
-
-    public function setDateBeginWork(\DateTimeInterface $dateBeginWork): self
-    {
-        $this->dateBeginWork = $dateBeginWork;
-
-        return $this;
-    }
-
-    public function getDateEndWork(): ?\DateTimeInterface
-    {
-        return $this->dateEndWork;
-    }
-
-    public function setDateEndWork(\DateTimeInterface $dateEndWork): self
-    {
-        $this->dateEndWork = $dateEndWork;
+        $this->employee = $employee;
 
         return $this;
     }

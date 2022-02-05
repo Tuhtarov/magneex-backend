@@ -6,9 +6,6 @@ use App\Repository\EmployeeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation\SerializedName;
-use Symfony\Component\Serializer\Annotation\Ignore;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: EmployeeRepository::class)]
 class Employee
@@ -25,22 +22,22 @@ class Employee
     #[ORM\ManyToOne(targetEntity: Role::class, inversedBy: 'employees')]
     private $role;
 
-    #[ORM\ManyToMany(targetEntity: Visit::class, mappedBy: 'employee')]
-    private $visits;
-
     #[ORM\OneToOne(mappedBy: 'employee', targetEntity: User::class, cascade: ['persist', 'remove'])]
     private $user;
 
     #[ORM\ManyToOne(targetEntity: JobPosition::class, inversedBy: 'employees')]
     private $jobPosition;
 
-    public const JOB_POSITION_FK_NAME = 'job_position_id';
-    public const ROLE_FK_NAME = 'role_id';
+    #[ORM\OneToMany(mappedBy: 'employee', targetEntity: Visit::class)]
+    private $visits;
 
     public function __construct()
     {
         $this->visits = new ArrayCollection();
     }
+
+    public const JOB_POSITION_FK_NAME = 'job_position_id';
+    public const ROLE_FK_NAME = 'role_id';
 
     public function getId(): ?int
     {
@@ -71,33 +68,6 @@ class Employee
         return $this;
     }
 
-    /**
-     * @return Collection|Visit[]
-     */
-    public function getVisits(): Collection
-    {
-        return $this->visits;
-    }
-
-    public function addVisit(Visit $visit): self
-    {
-        if (!$this->visits->contains($visit)) {
-            $this->visits[] = $visit;
-            $visit->addEmployee($this);
-        }
-
-        return $this;
-    }
-
-    public function removeVisit(Visit $visit): self
-    {
-        if ($this->visits->removeElement($visit)) {
-            $visit->removeEmployee($this);
-        }
-
-        return $this;
-    }
-
     public function getUser(): ?User
     {
         return $this->user;
@@ -123,6 +93,36 @@ class Employee
     public function setJobPosition(?JobPosition $jobPosition): self
     {
         $this->jobPosition = $jobPosition;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Visit[]
+     */
+    public function getVisits(): Collection
+    {
+        return $this->visits;
+    }
+
+    public function addVisit(Visit $visit): self
+    {
+        if (!$this->visits->contains($visit)) {
+            $this->visits[] = $visit;
+            $visit->setEmployee($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVisit(Visit $visit): self
+    {
+        if ($this->visits->removeElement($visit)) {
+            // set the owning side to null (unless already changed)
+            if ($visit->getEmployee() === $this) {
+                $visit->setEmployee(null);
+            }
+        }
 
         return $this;
     }

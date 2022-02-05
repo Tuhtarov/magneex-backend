@@ -4,11 +4,11 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use JetBrains\PhpStorm\Pure;
 use JMS\Serializer\Annotation\Exclude;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -93,7 +93,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $roles = [];
 
         // берём роль пользователя через Employee (связана с User)
-        $currentRole = $this->employee->getRole()->getName();
+        try {
+            $currentRole = $this->employee->getRole()->getName();
+        } catch (Exception $e) {
+            $currentRole = null;
+        }
 
         if (!empty($currentRole)) {
             $currentRole = 'ROLE_' . strtoupper($currentRole);
@@ -104,6 +108,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
+    }
+
+    #[Pure]
+    public function isAdmin(): bool
+    {
+        $currentRoles = $this->getRoles();
+
+        foreach ($currentRoles as $currentRole) {
+            if ($currentRole === 'ROLE_ADMIN') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function eraseCredentials()
