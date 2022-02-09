@@ -1,19 +1,15 @@
 <?php
 
-namespace App\Service\Employee;
+namespace App\Service\Visit;
 
 use App\Entity\Employee;
-use App\Entity\Visit;
 use App\Repository\VisitRepository;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
-use Doctrine\ORM\EntityManagerInterface;
 
-class VisitChecker
+class VisitChecker implements IVisitChecker
 {
     private VisitRepository $repository;
 
-    public function __construct(\App\Repository\VisitRepository $repository)
+    public function __construct(VisitRepository $repository)
     {
         $this->repository = $repository;
     }

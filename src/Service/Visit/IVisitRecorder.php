@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\VisitRecorder;
+namespace App\Service\Visit;
 
 use App\Entity\Employee;
 use App\Entity\QR;

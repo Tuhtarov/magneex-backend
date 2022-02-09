@@ -2,9 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Role;
 use App\Repository\RoleRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -12,33 +11,35 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/roles', name: 'api_roles_')]
 class RoleController extends AbstractApiController
 {
-    #[Route('/', name: 'all', methods: ['GET'])]
-    public function index(EntityManagerInterface $manager): Response
-    {
-        $roles = $manager->getRepository(Role::class)->findAll();
+    private RoleRepository $roleRepository;
 
-        if (count($roles) > 0) {
-            return $this->respond(['roles' => $roles]);
+    public function __construct(RoleRepository $roleRepository)
+    {
+        $this->roleRepository = $roleRepository;
+    }
+
+    #[Route('/', name: 'all', methods: ['GET'])]
+    public function index(): Response
+    {
+        $roles = $this->roleRepository->findAll();
+
+        if (empty($roles)) {
+            throw new BadRequestException('Roles is not found');
         }
 
-        return $this->json(['message' => 'all bad'], Response::HTTP_BAD_REQUEST);
+        return $this->respond(['roles' => $roles]);
     }
 
     #[Route('/create', name: 'create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $manager): Response
+    public function create(Request $request): Response
     {
         $name = $request->request->get('name');
-
-        /** @var $roleRepo RoleRepository */
-        $roleRepo = $manager->getRepository(Role::class);
-        $role = $roleRepo->findBy(['name' => $name]);
+        $role = $this->roleRepository->findBy(['name' => $name]);
 
         if (!$role) {
-            $role = $roleRepo->create($name);
+            $role = $this->roleRepository->create($name);
         }
 
-        return $this->respond([
-            'role' => $role
-        ]);
+        return $this->respond(['role' => $role], Response::HTTP_CREATED);
     }
 }

@@ -28,7 +28,9 @@ class UserRepository extends ServiceEntityRepository
     {
         $dataExists = !empty($data['login']) && !empty($data['password']) && !empty($data['employeeId']);
 
-        if (!$dataExists) return null;
+        if (!$dataExists) {
+            return null;
+        }
 
         $manager = $this->getEntityManager();
         $employee = $manager->getRepository(Employee::class)->find($data['employeeId']);
@@ -51,7 +53,7 @@ class UserRepository extends ServiceEntityRepository
         return null;
     }
 
-    private function setPassword(User &$user, string $password)
+    private function setPassword(User &$user, string $password): void
     {
         $hashedPassword = $this->pwdHash->hashPassword($user, $password);
         $user->setPassword($hashedPassword);

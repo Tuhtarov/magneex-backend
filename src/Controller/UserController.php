@@ -2,51 +2,46 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
-use App\Service\UserFetcherForResponse;
+use App\Repository\UserRepository;
+use App\Service\User\CurrentUser;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/user', name: 'api_user_')]
 class UserController extends AbstractApiController
 {
-    private ManagerRegistry $doctrine;
+    private UserRepository $userRepository;
 
-    public function __construct(ManagerRegistry $doctrine)
+    public function __construct(UserRepository $userRepository)
     {
-        $this->doctrine = $doctrine;
+        $this->userRepository = $userRepository;
     }
 
     #[Route('/all', name: 'all', methods: ['GET'])]
     public function index(): Response
     {
-        $users = $this->doctrine->getRepository(User::class)->findAll();
+        $users = $this->userRepository->findAll();
 
         if (count($users) > 0) {
             return $this->respond(['users' => $users]);
         }
 
-        return $this->respond(['message' => 'Users is empty'], Response::HTTP_BAD_REQUEST);
+        throw new BadRequestException('Users is empty');
     }
 
     #[Route('/current', name: 'current', methods: ['GET'])]
-    public function current(UserFetcherForResponse $userResponse): Response
+    public function current(CurrentUser $user): Response
     {
-        $userData = $userResponse->fetchAssoc();
-
-        if ($userData) {
-            $code = Response::HTTP_OK;
-            $responseBody = $userResponse->fetchAssoc();
-        } else {
-            $code = Response::HTTP_I_AM_A_TEAPOT;
-            $responseBody = ['message' => 'User is not found'];
+        try {
+            $userData = $user->getAssoc();
+        } catch (\Exception $e) {
+            throw new BadRequestException('User is not found');
         }
 
-        return $this->json($responseBody, $code);
+        return $this->respond(['user' => $userData]);
     }
 
     #[Route('/create', name: 'create', methods: ['POST'])]
@@ -55,19 +50,19 @@ class UserController extends AbstractApiController
         $userData = $request->request->all("user");
 
         if (!$userData) {
-            return $this->respond(['message' => 'In body don`t exist "user" key'], Response::HTTP_BAD_REQUEST);
+            throw new BadRequestException('In body don`t exist "user" key');
         }
 
         try {
-            $user = $this->doctrine->getRepository(User::class)->create($userData);
+            $user = $this->userRepository->create($userData);
         } catch (UniqueConstraintViolationException $exception) {
-            return $this->respond(['message' => 'Duplicate key'],Response::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->respond(['message' => 'Duplicate key'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         if ($user) {
             return $this->respond(['user' => $user]);
         }
 
-        return $this->respond(['message' => 'User is not created'], Response::HTTP_BAD_REQUEST);
+        throw new BadRequestException('User is not created');
     }
 }

@@ -3,13 +3,13 @@
 namespace App\Service\Centrifugo;
 
 use App\Entity\User;
-use App\Service\Centrifugo\Interface\ICentrifugoJwtManager;
+use App\Service\Centrifugo\Interface\IRealTimeServer;
+use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
 use phpcent\Client;
-use phpDocumentor\Reflection\Types\This;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-abstract class CentrifugoBase implements ICentrifugoJwtManager
+abstract class CentrifugoBase implements IRealTimeServer
 {
     private Client $centrifugo;
     private string $urlConnection;
@@ -68,31 +68,40 @@ abstract class CentrifugoBase implements ICentrifugoJwtManager
     }
 
     /**
+     * Возвращает ассоциативный массив с конфигом для подключения подписчиков к серверу.
+     * @param User $user - подписчик.
+     * @return array - конфиг.
+     */
+    #[ArrayShape(['url' => "string", 'token' => "string", 'channel' => "mixed"])]
+    public function getConfigForSubscriber(User $user): array
+    {
+        return [
+            'url' => $this->getUrlConnection(),
+            'token' => $this->generateToken($user),
+            'channel' => $this->getChannel()
+        ];
+    }
+
+    /**
      * Подписать пользователя на получение обновлений.
      * @param User $user
-     * @return CentrifugoBase
      */
-    public function subscribe(User $user): self
+    public function subscribe(User $user): void
     {
         $this->centrifugo->subscribe($this->channel,
             $this->getUniqueStringFromUser($user)
         );
-
-        return $this;
     }
 
     /**
      * Отписать пользователя от обновлений.
      * @param User $user
-     * @return CentrifugoBase
      */
-    public function unsubscribe(User $user): self
+    public function unsubscribe(User $user): void
     {
         $this->centrifugo->unsubscribe($this->channel,
             $this->getUniqueStringFromUser($user)
         );
-
-        return $this;
     }
 
     /**
@@ -100,7 +109,7 @@ abstract class CentrifugoBase implements ICentrifugoJwtManager
      * @param array $data
      * @return void
      */
-    protected function publish(array $data): void
+    public function publish(array $data): void
     {
         if (!$this->channel) {
             throw new \RuntimeException("Don't specified channel");

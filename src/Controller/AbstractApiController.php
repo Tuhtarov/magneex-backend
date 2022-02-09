@@ -54,8 +54,8 @@ abstract class AbstractApiController extends AbstractFOSRestController
         throw new AccessDeniedException();
     }
 
-    protected function respond($data, int $statusCode = Response::HTTP_OK): Response
+    protected function respond($data, int $code = Response::HTTP_OK): Response
     {
-        return $this->handleView($this->view($data, $statusCode));
+        return $this->handleView($this->view($data, $code));
     }
 }
