@@ -8,7 +8,7 @@ use App\Repository\QRRepository;
 use App\Service\Centrifugo\Interface\IRealTimeServer;
 use App\Service\Visit\IVisitChecker;
 use App\Service\Visit\IVisitRecorder;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -33,11 +33,13 @@ class QRController extends AbstractApiController
         $this->qrRepo = $qrRepo;
     }
 
+
     #[Route('/connection', name: 'subscribe', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function subscribeConnection(): Response
     {
-        // подписываем админа
-        $user = $this->getUserIfAdmin();
+        /** @var User $user */
+        $user = $this->getUser();
         $this->realTimeServer->subscribe($user);
         $connectionConfig = $this->realTimeServer->getConfigForSubscriber($user);
 
@@ -61,24 +63,18 @@ class QRController extends AbstractApiController
     #[Route('/scan/{token}/{id<\d+>?}', name: 'scan', methods: ['GET'])]
     public function scanQr(string $token, ?int $id = null): Response
     {
-        try {
-            $qr = $this->qrRepo->fetchQrBy($token, $id);
-            $employee = $this->getCurrentEmployee();
-            $workIsCompleted = $this->visitChecker->todayWorkIsCompleted($employee);
+        $qr = $this->qrRepo->fetchQrBy($token, $id);
+        $employee = $this->getCurrentEmployee();
+        $workIsCompleted = $this->visitChecker->todayWorkIsCompleted($employee);
 
-            if (!$workIsCompleted) {
-                // регистрируем посещение
-                $visit = $this->visitRecorder->record($employee, $qr);
-                $this->publishQR($this->qrRepo->create());
+        if (!$workIsCompleted) {
+            $visit = $this->visitRecorder->record($employee, $qr); // учитываем посещение
+            $this->publishQR($this->qrRepo->create());
 
-                return $this->respond(['visit' => $visit], Response::HTTP_CREATED);
-            }
-
-            return $this->respond(['message' => 'Your work is completed'], Response::HTTP_CONFLICT);
-
-        } catch (\RuntimeException $e) {
-            throw new BadRequestException($e);
+            return $this->respond(['visit' => $visit], Response::HTTP_CREATED);
         }
+
+        return $this->respond(['message' => 'Your work is completed'], Response::HTTP_CONFLICT);
     }
 
     private function publishQr(QR $qr): void

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Employee;
 use App\Entity\User;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +23,7 @@ abstract class AbstractApiController extends AbstractFOSRestController
     }
 
     /**
-     * Получает сотрудника из текущего User.
+     * Получает связанную сущность People с текущего User.
      * @return Employee
      */
     protected function getCurrentEmployee(): Employee
@@ -38,21 +39,6 @@ abstract class AbstractApiController extends AbstractFOSRestController
         return $user->getEmployee();
     }
 
-    /**
-     * Получает пользователя, если его роль соответствует админской.
-     * @return User
-     */
-    protected function getUserIfAdmin(): User
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-
-        if ($user && $user->isAdmin()) {
-            return $user;
-        }
-
-        throw new AccessDeniedException();
-    }
 
     protected function respond($data, int $code = Response::HTTP_OK): Response
     {

@@ -2,152 +2,81 @@
 
 namespace App\Controller;
 
-use App\Entity\Employee;
-use App\Entity\JobPosition;
-use App\Entity\People;
-use App\Entity\Role;
-use App\Form\Type\PeopleType;
 use App\Repository\EmployeeRepository;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/api/employees', name: 'api_')]
+#[Route('/api/employees', name: 'api_employees_')]
 class EmployeeController extends AbstractApiController
 {
-    private EntityManagerInterface $entityManager;
+    private EmployeeRepository $employeeRepository;
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     */
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EmployeeRepository $employeeRepository)
     {
-        $this->entityManager = $entityManager;
+        $this->employeeRepository = $employeeRepository;
     }
 
-    #[Route('/', name: 'employees_list', methods: ['GET'])]
-    public function index(ManagerRegistry $doctrine): Response
+    #[Route('/', name: 'list', methods: ['GET'])]
+    public function index(): Response
     {
-        $employees = $doctrine->getManager()->getRepository(Employee::class)->findAll();
+        $employees = $this->employeeRepository->findAll();
 
-        if (!empty($employees)) {
-            // return this->json($employees)
-            // CircularReferenceException
-            return $this->respond(['employees' => $employees]);
+        if (empty($employees)) {
+            throw $this->createNotFoundException('Employees is empty');
         }
 
-        throw $this->createNotFoundException('Employees is empty');
+        // CircularReferenceException
+        return $this->respond(['employees' => $employees]);
     }
 
-    #[Route('/get/{id}', name: 'employees_show', methods: ['GET'])]
-    public function show(int $id, ManagerRegistry $manager): Response
+    #[Route('/get/{id}', name: 'show', methods: ['GET'])]
+    public function show(int $id): Response
     {
-        $employee = $manager->getRepository(Employee::class)->find($id);
+        $employee = $this->employeeRepository->find($id);
 
         if ($employee) {
             return $this->respond(['employee' => $employee]);
         }
 
-        throw new NotFoundHttpException('Employee is not found');
+        throw $this->createNotFoundException('Employee is not found');
     }
 
-    #[Route('/delete/{id}', name: 'employees_delete', methods: ['POST'])]
-    public function delete(int $id, ManagerRegistry $doctrine): Response
+    #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
+    public function delete(int $id): Response
     {
-        $manager = $doctrine->getManager();
-        $employee = $manager->getRepository(Employee::class)->find($id);
+        $result = $this->employeeRepository->findAndDeleteById($id);
+
+        if ($result) {
+            return $this->respond(['message' => "Employee deleted"]);
+        }
+
+        throw $this->createNotFoundException("Employee is not found");
+    }
+
+    #[Route('/edit/{id}', name: 'edit', methods: ['UPDATE'])]
+    public function edit(int $id): Response
+    {
+        $employee = $this->employeeRepository->find($id);
 
         if ($employee) {
-            $manager->remove($employee);
-            $manager->flush($employee);
-
-            return $this->respond(['id' => $employee->getId(), 'message' => 'deleted']);
+            // TODO допилить редактирование
+            return $this->respond(['id' => $id]);
         }
 
-        throw $this->createNotFoundException('No employee found for id ' . $id);
+        throw $this->createNotFoundException("Employee is not found");
     }
 
-    #[Route('/edit/{id}', name: 'employees_edit', methods: ['POST'])]
-    public function edit(ManagerRegistry $doctrine, int $id): Response
-    {
-        $entityManager = $doctrine->getManager();
-        $employee = $entityManager->getRepository(Employee::class)->find($id);
-
-        if (!$employee) {
-            throw $this->createNotFoundException('No employee found for id ' . $id);
-        }
-
-//        $employee->setName('New employee name!');
-//        $entityManager->flush();
-
-        return $this->respond(['id' => $employee->getId()]);
-    }
-
-    #[Route('/create', name: 'employees_create', methods: ['POST'])]
+    #[Route('/create', name: 'create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        /** @var People $people */
-        /** @var EmployeeRepository $repository */
+        $employee = $this->employeeRepository->createFromRequest($request);
 
-        $form = $this->buildForm(PeopleType::class);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $repository = $this->entityManager->getRepository(Employee::class);
-
-            try {
-                $repository->createEmployee($form->getData());
-                $repository->setRole($this->getRoleFromRequest($request));
-                $repository->setJobPosition($this->getJobPositionFromRequest($request));
-
-                $repository->persist($this->entityManager)->save();
-
-                return $this->respond($repository->getEntity());
-            } catch (\Exception $e) {
-                return $this->respond(['message' => 'runtime error'], Response::HTTP_I_AM_A_TEAPOT);
-            }
+        if ($employee) {
+            return $this->respond(['employee' => $employee]);
         }
 
-        $errors = $form->getErrors();
-
-        return $this->respond([
-            'errors' => $errors,
-        ], Response::HTTP_BAD_REQUEST);
-    }
-
-    private function getRoleFromRequest(Request $request): ?Role
-    {
-        $roleId = $request->request->get(Employee::ROLE_FK_NAME);
-
-        if ($roleId !== null) {
-            return $this->entityManager->getRepository(Role::class)->find($roleId);
-        }
-
-        return null;
-    }
-
-
-    private function getJobPositionFromRequest(Request $request): ?JobPosition
-    {
-        $jobPositionId = $request->request->get(Employee::JOB_POSITION_FK_NAME);
-
-        if ($jobPositionId !== null) {
-            return $this->entityManager->getRepository(JobPosition::class)->find($jobPositionId);
-        }
-
-        return null;
+        throw new BadRequestException('Employee is not created');
     }
 }

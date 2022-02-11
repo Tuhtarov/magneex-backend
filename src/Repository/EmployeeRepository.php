@@ -3,13 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Employee;
-use App\Entity\JobPosition;
-use App\Entity\People;
-use App\Entity\Role;
+use App\Service\Employee\RequestBuilderEmployee;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @method Employee|null find($id, $lockMode = null, $lockVersion = null)
@@ -19,52 +16,42 @@ use Symfony\Component\Form\FormInterface;
  */
 class EmployeeRepository extends ServiceEntityRepository
 {
-    private Employee $employee;
-    private EntityManagerInterface $manager;
+    private RequestBuilderEmployee $builderEmployee;
 
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, RequestBuilderEmployee $builder)
     {
         parent::__construct($registry, Employee::class);
+        $this->builderEmployee = $builder;
     }
 
-    public function createEmployee(People $people): self
+    public function createFromRequest(Request $request): ?Employee
     {
-        $employee = new Employee();
+        $employee = $this->builderEmployee->createFromRequest($request);
 
-        $employee->setPeople($people);
+        if ($employee) {
+            $this->getEntityManager()->persist($employee);
+            $this->getEntityManager()->flush();
+            return $employee;
+        }
 
-        $this->employee = $employee;
-
-        return $this;
+        return null;
     }
 
-    public function setRole(?Role $role): self
+    /**
+     * TRUE - сущность удалена | FALSE - ошибка удаления.
+     * @param int $id
+     * @return bool
+     */
+    public function findAndDeleteById(int $id): bool
     {
-        $this->employee->setRole($role);
-        return $this;
-    }
+        $employee = $this->find($id);
 
-    public function setJobPosition(?JobPosition $jobPosition): self
-    {
-        $this->employee->setJobPosition($jobPosition);
-        return $this;
-    }
+        if ($employee) {
+            $this->getEntityManager()->remove($employee);
+            $this->getEntityManager()->flush();
+            return true;
+        }
 
-    public function persist(EntityManagerInterface $manager): self
-    {
-        $this->manager = $manager;
-        $this->manager->persist($this->employee);
-
-        return $this;
-    }
-
-    public function save()
-    {
-        $this->manager->flush();
-    }
-
-    public function getEntity(): Employee
-    {
-        return $this->employee;
+        return false;
     }
 }
