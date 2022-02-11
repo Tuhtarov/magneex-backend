@@ -34,6 +34,7 @@ class RoleController extends AbstractApiController
     public function create(Request $request): Response
     {
         $name = $request->request->get('name');
+
         $role = $this->roleRepository->findBy(['name' => $name]);
 
         if (!$role) {

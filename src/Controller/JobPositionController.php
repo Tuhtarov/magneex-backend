@@ -20,29 +20,25 @@ class JobPositionController extends AbstractApiController
         $this->jobPositionRepository = $jobPositionRepository;
     }
 
-    #[Route('/', name: 'get_all')]
+    #[Route('/', name: 'all', methods: ['GET'])]
     public function index(): Response
     {
         $positions = $this->jobPositionRepository->findAll();
 
-        if (empty($positions)) {
-            return $this->respond(['message' => 'fuck']);
-        }
-
-        return $this->respond(['message' => 'all god', 'jobPositions' => $positions]);
+        return $this->respond(['jobPositions' => $positions]);
     }
 
-    #[Route('/create', name: 'create')]
+    #[Route('/create', name: 'create', methods: ['POST'])]
     public function create(Request $request): Response
     {
         $name = $request->request->get('name');
 
-        if (empty($name)) {
-            throw new BadRequestException('Name is empty');
+        if (!empty($name)) {
+            $position = $this->jobPositionRepository->firstOrCreate($name);
+
+            return $this->respond(['jobPosition' => $position], Response::HTTP_CREATED);
         }
 
-        $position = $this->jobPositionRepository->firstOrCreate($name);
-
-        return $this->respond(['jobPosition' => $position], Response::HTTP_CREATED);
+        throw new BadRequestException('Error create');
     }
 }

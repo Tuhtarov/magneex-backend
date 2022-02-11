@@ -47,11 +47,16 @@ class EmployeeRepository extends ServiceEntityRepository
         $employee = $this->find($id);
 
         if ($employee) {
-            $this->getEntityManager()->remove($employee);
-            $this->getEntityManager()->flush();
+            $this->deleteEntity($employee);
             return true;
         }
 
         return false;
+    }
+
+    public function deleteEntity(Employee $employee): void
+    {
+        $this->getEntityManager()->remove($employee);
+        $this->getEntityManager()->flush();
     }
 }

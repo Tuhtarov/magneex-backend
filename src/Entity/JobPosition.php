@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\JobPositionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: JobPositionRepository::class)]
 class JobPosition
@@ -17,6 +18,7 @@ class JobPosition
     private $name;
 
     #[ORM\OneToMany(mappedBy: 'jobPosition', targetEntity: Employee::class)]
+    #[Ignore]
     private $employees;
 
     public function getId(): ?int

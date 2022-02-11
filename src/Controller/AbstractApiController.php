@@ -4,12 +4,16 @@ namespace App\Controller;
 
 use App\Entity\Employee;
 use App\Entity\User;
+use Doctrine\Common\Annotations\AnnotationReader;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
-use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 abstract class AbstractApiController extends AbstractFOSRestController
 {
@@ -42,6 +46,15 @@ abstract class AbstractApiController extends AbstractFOSRestController
 
     protected function respond($data, int $code = Response::HTTP_OK): Response
     {
-        return $this->handleView($this->view($data, $code));
+        $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
+
+        $serializer = new Serializer(
+            [new ObjectNormalizer($classMetadataFactory)],
+            ['json' => new JsonEncoder()]
+        );
+
+        $json = $serializer->normalize($data, 'json');
+
+        return $this->json($json, $code);
     }
 }

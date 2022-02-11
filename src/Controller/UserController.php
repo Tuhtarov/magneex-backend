@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Repository\UserRepository;
 use App\Service\User\CurrentUser;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Exception;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +25,7 @@ class UserController extends AbstractApiController
     {
         $users = $this->userRepository->findAll();
 
-        if (count($users) > 0) {
+        if (!empty($users)) {
             return $this->respond(['users' => $users]);
         }
 
@@ -37,11 +37,16 @@ class UserController extends AbstractApiController
     {
         try {
             $userData = $user->getAssoc();
-        } catch (\Exception $e) {
+        } catch (Exception) {
             throw new BadRequestException('User is not found');
         }
 
         return $this->respond(['user' => $userData]);
+
+        /*
+        $user = $this->getUser();
+        return $this->respond(['user' => $user]);
+        */
     }
 
     #[Route('/create', name: 'create', methods: ['POST'])]
@@ -49,18 +54,12 @@ class UserController extends AbstractApiController
     {
         $userData = $request->request->all("user");
 
-        if (!$userData) {
-            throw new BadRequestException('In body don`t exist "user" key');
-        }
-
-        try {
+        if ($userData) {
             $user = $this->userRepository->create($userData);
-        } catch (UniqueConstraintViolationException $exception) {
-            return $this->respond(['message' => 'Duplicate key'], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
 
-        if ($user) {
-            return $this->respond(['user' => $user]);
+            if ($user) {
+                return $this->respond(['user' => $user]);
+            }
         }
 
         throw new BadRequestException('User is not created');

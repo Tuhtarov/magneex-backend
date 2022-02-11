@@ -3,9 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PeopleRepository;
-use Cassandra\Date;
-use Doctrine\DBAL\Types\DateType;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: PeopleRepository::class)]
 class People
@@ -25,6 +24,7 @@ class People
     private $patronymic;
 
     #[ORM\Column(type: 'date')]
+    #[Ignore]
     private $birthday;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -34,6 +34,7 @@ class People
     private $phone;
 
     #[ORM\OneToOne(mappedBy: 'people', targetEntity: Employee::class, cascade: ['persist', 'remove'])]
+    #[Ignore]
     private $employee;
 
     public function getId(): ?int
@@ -134,6 +135,7 @@ class People
      * Получить ассоциативный массив, представляющий данные человека
      * @return array
      */
+    #[Ignore]
     public function getAssocData(): array
     {
         $date = $this->getBirthday()->format('Y-m-d');

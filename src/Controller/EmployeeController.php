@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Employee;
 use App\Repository\EmployeeRepository;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,49 +24,32 @@ class EmployeeController extends AbstractApiController
     {
         $employees = $this->employeeRepository->findAll();
 
-        if (empty($employees)) {
-            throw $this->createNotFoundException('Employees is empty');
+        if (!empty($employees)) {
+            return $this->respond(['employees' => $employees]);
         }
 
-        // CircularReferenceException
-        return $this->respond(['employees' => $employees]);
+        throw $this->createNotFoundException('Employees is empty');
     }
 
     #[Route('/get/{id}', name: 'show', methods: ['GET'])]
-    public function show(int $id): Response
+    public function show(Employee $employee): Response
     {
-        $employee = $this->employeeRepository->find($id);
-
-        if ($employee) {
-            return $this->respond(['employee' => $employee]);
-        }
-
-        throw $this->createNotFoundException('Employee is not found');
+        return $this->respond(['employee' => $employee]);
     }
 
     #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
-    public function delete(int $id): Response
+    public function delete(Employee $employee): Response
     {
-        $result = $this->employeeRepository->findAndDeleteById($id);
+        $this->employeeRepository->deleteEntity($employee);
 
-        if ($result) {
-            return $this->respond(['message' => "Employee deleted"]);
-        }
-
-        throw $this->createNotFoundException("Employee is not found");
+        return $this->respond(['message' => "Employee deleted"]);
     }
 
     #[Route('/edit/{id}', name: 'edit', methods: ['UPDATE'])]
-    public function edit(int $id): Response
+    public function edit(Employee $employee): Response
     {
-        $employee = $this->employeeRepository->find($id);
-
-        if ($employee) {
-            // TODO допилить редактирование
-            return $this->respond(['id' => $id]);
-        }
-
-        throw $this->createNotFoundException("Employee is not found");
+        // TODO допилить редактирование
+        return $this->respond(['employee' => $employee]);
     }
 
     #[Route('/create', name: 'create', methods: ['POST'])]
@@ -80,3 +64,4 @@ class EmployeeController extends AbstractApiController
         throw new BadRequestException('Employee is not created');
     }
 }
+

@@ -6,6 +6,7 @@ use App\Repository\EmployeeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: EmployeeRepository::class)]
 class Employee
@@ -23,12 +24,14 @@ class Employee
     private $role;
 
     #[ORM\OneToOne(mappedBy: 'employee', targetEntity: User::class, cascade: ['persist', 'remove'])]
+    #[Ignore]
     private $user;
 
     #[ORM\ManyToOne(targetEntity: JobPosition::class, inversedBy: 'employees')]
     private $jobPosition;
 
     #[ORM\OneToMany(mappedBy: 'employee', targetEntity: Visit::class)]
+    #[Ignore]
     private $visits;
 
     public function __construct()
