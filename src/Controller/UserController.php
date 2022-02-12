@@ -10,17 +10,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/user', name: 'api_user_')]
+#[Route('/api/users', name: 'api_user_')]
 class UserController extends AbstractApiController
 {
-    private UserRepository $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(private UserRepository $userRepository)
     {
-        $this->userRepository = $userRepository;
     }
 
-    #[Route('/all', name: 'all', methods: ['GET'])]
+    #[Route('/', name: 'all', methods: ['GET'])]
     public function index(): Response
     {
         $users = $this->userRepository->findAll();

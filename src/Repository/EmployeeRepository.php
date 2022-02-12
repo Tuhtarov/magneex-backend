@@ -16,12 +16,10 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class EmployeeRepository extends ServiceEntityRepository
 {
-    private RequestBuilderEmployee $builderEmployee;
 
-    public function __construct(ManagerRegistry $registry, RequestBuilderEmployee $builder)
+    public function __construct(ManagerRegistry $registry, private RequestBuilderEmployee $builderEmployee)
     {
         parent::__construct($registry, Employee::class);
-        $this->builderEmployee = $builder;
     }
 
     public function createFromRequest(Request $request): ?Employee
@@ -60,3 +58,4 @@ class EmployeeRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 }
+

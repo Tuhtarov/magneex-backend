@@ -4,10 +4,8 @@ namespace App\Repository;
 
 use App\Entity\QR;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use RuntimeException;
-use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
 
 /**
  * @method QR|null find($id, $lockMode = null, $lockVersion = null)
@@ -17,12 +15,9 @@ use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
  */
 class QRRepository extends ServiceEntityRepository
 {
-    private EntityManagerInterface $doctrine;
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, QR::class);
-        $this->doctrine = $this->getEntityManager();
     }
 
     public function create(): QR
@@ -30,8 +25,8 @@ class QRRepository extends ServiceEntityRepository
         $qr = new QR();
         $qr->setToken($this->getRandomString(9));
         $qr->setIsExpired(false);
-        $this->doctrine->persist($qr);
-        $this->doctrine->flush($qr);
+        $this->getEntityManager()->persist($qr);
+        $this->getEntityManager()->flush($qr);
 
         return $qr;
     }
@@ -72,8 +67,8 @@ class QRRepository extends ServiceEntityRepository
 
         // удаляем просроченный токен
         if ($qr->getIsExpired()) {
-            $this->doctrine->remove($qr);
-            $this->doctrine->flush();
+            $this->getEntityManager()->remove($qr);
+            $this->getEntityManager()->flush();
             throw new RuntimeException("Invalid QR. Token is expired.");
         }
     }

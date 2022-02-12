@@ -7,16 +7,13 @@ use App\Repository\VisitRepository;
 
 class VisitChecker implements IVisitChecker
 {
-    private VisitRepository $repository;
-
-    public function __construct(VisitRepository $repository)
+    public function __construct(private VisitRepository $visitRepository)
     {
-        $this->repository = $repository;
     }
 
     public function todayWorkIsCompleted(Employee $employee): bool
     {
-        $visit = $this->repository->findTodayVisit($employee);
+        $visit = $this->visitRepository->findTodayVisit($employee);
 
         if ($visit) {
             return $visit->getBeginWorkTime() && $visit->getEndWorkTime();

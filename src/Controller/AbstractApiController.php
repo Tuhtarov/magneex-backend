@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
@@ -49,11 +51,19 @@ abstract class AbstractApiController extends AbstractFOSRestController
         $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
 
         $serializer = new Serializer(
-            [new ObjectNormalizer($classMetadataFactory)],
+            [new DateTimeNormalizer(), new ObjectNormalizer($classMetadataFactory)],
             ['json' => new JsonEncoder()]
         );
 
-        $json = $serializer->normalize($data, 'json');
+        $json = $serializer->normalize($data, 'json', [
+            AbstractNormalizer::IGNORED_ATTRIBUTES => [
+                '__cloner__',
+                '__initializer__',
+                '__isInitialized__',
+                'timezone',
+                'offset'
+            ],
+        ]);
 
         return $this->json($json, $code);
     }

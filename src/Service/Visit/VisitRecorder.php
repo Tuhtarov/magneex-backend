@@ -9,11 +9,8 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class VisitRecorder implements IVisitRecorder
 {
-    private EntityManagerInterface $doctrine;
-
-    public function __construct(EntityManagerInterface $doctrine)
+    public function __construct(private EntityManagerInterface $doctrine)
     {
-        $this->doctrine = $doctrine;
     }
 
     public function record(Employee $employee, QR $qr): Visit

@@ -14,20 +14,13 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RequestBuilderEmployee extends BuilderEmployee
 {
-    private FormFactoryInterface $formFactory;
-    private EntityManagerInterface $manager;
-    private BuilderEmployee $builderEmployee;
-
     public function __construct(
-        FormFactoryInterface   $formFactory,
-        EntityManagerInterface $manager,
-        BuilderEmployee        $builderEmployee
+        private FormFactoryInterface   $formFactory,
+        private EntityManagerInterface $manager,
+        private BuilderEmployee        $builderEmployee
     )
     {
         parent::__construct();
-        $this->builderEmployee = $builderEmployee;
-        $this->formFactory = $formFactory;
-        $this->manager = $manager;
     }
 
     public function createFromRequest(Request $request): ?Employee

@@ -15,22 +15,12 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('api/qr', name: 'api_qr_')]
 class QRController extends AbstractApiController
 {
-    private IRealTimeServer $realTimeServer;
-    private IVisitRecorder $visitRecorder;
-    private IVisitChecker $visitChecker;
-    private QRRepository $qrRepo;
-
     public function __construct(
-        IRealTimeServer $centrifugo,
-        IVisitRecorder  $visitRecorder,
-        IVisitChecker   $visitChecker,
-        QRRepository    $qrRepo
-    )
-    {
-        $this->realTimeServer = $centrifugo;
-        $this->visitRecorder = $visitRecorder;
-        $this->visitChecker = $visitChecker;
-        $this->qrRepo = $qrRepo;
+        private IRealTimeServer $realTimeServer,
+        private IVisitRecorder  $visitRecorder,
+        private IVisitChecker   $visitChecker,
+        private QRRepository    $qrRepo
+    ) {
     }
 
 

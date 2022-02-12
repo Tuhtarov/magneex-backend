@@ -24,7 +24,6 @@ class People
     private $patronymic;
 
     #[ORM\Column(type: 'date')]
-    #[Ignore]
     private $birthday;
 
     #[ORM\Column(type: 'string', length: 255)]

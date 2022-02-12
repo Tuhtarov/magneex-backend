@@ -6,7 +6,6 @@ use App\Entity\Employee;
 use App\Entity\Visit;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -43,23 +42,6 @@ class VisitRepository extends ServiceEntityRepository
 
         return $visit;
     }
-
-    // /**
-    //  * @return Visit[] Returns an array of Visit objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('v')
-            ->andWhere('v.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('v.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
 
     public function findTodayVisit(Employee $employee): ?Visit
     {

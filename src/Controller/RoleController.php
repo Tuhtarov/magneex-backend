@@ -11,11 +11,8 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/roles', name: 'api_roles_')]
 class RoleController extends AbstractApiController
 {
-    private RoleRepository $roleRepository;
-
-    public function __construct(RoleRepository $roleRepository)
+    public function __construct(private RoleRepository $roleRepository)
     {
-        $this->roleRepository = $roleRepository;
     }
 
     #[Route('/', name: 'all', methods: ['GET'])]

@@ -16,12 +16,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  */
 class UserRepository extends ServiceEntityRepository
 {
-    private UserPasswordHasherInterface $pwdHash;
 
-    public function __construct(ManagerRegistry $registry, UserPasswordHasherInterface $pwdHash)
+    public function __construct(ManagerRegistry $registry, private UserPasswordHasherInterface $pwdHash)
     {
         parent::__construct($registry, User::class);
-        $this->pwdHash = $pwdHash;
     }
 
     public function create(array $data): ?User

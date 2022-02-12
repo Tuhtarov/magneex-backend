@@ -12,14 +12,10 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/employees', name: 'api_employees_')]
 class EmployeeController extends AbstractApiController
 {
-    private EmployeeRepository $employeeRepository;
+    public function __construct(private EmployeeRepository $employeeRepository)
+    {}
 
-    public function __construct(EmployeeRepository $employeeRepository)
-    {
-        $this->employeeRepository = $employeeRepository;
-    }
-
-    #[Route('/', name: 'list', methods: ['GET'])]
+    #[Route('/', name: 'all', methods: ['GET'])]
     public function index(): Response
     {
         $employees = $this->employeeRepository->findAll();
