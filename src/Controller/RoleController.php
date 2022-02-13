@@ -11,17 +11,17 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/roles', name: 'api_roles_')]
 class RoleController extends AbstractApiController
 {
-    public function __construct(private RoleRepository $roleRepository)
+    public function __construct(private RoleRepository $repository)
     {
     }
 
     #[Route('/', name: 'all', methods: ['GET'])]
     public function index(): Response
     {
-        $roles = $this->roleRepository->findAll();
+        $roles = $this->repository->findAll();
 
         if (empty($roles)) {
-            throw new BadRequestException('Roles is not found');
+            throw new BadRequestException('Roles not found');
         }
 
         return $this->respond(['roles' => $roles]);
@@ -32,12 +32,10 @@ class RoleController extends AbstractApiController
     {
         $name = $request->request->get('name');
 
-        $role = $this->roleRepository->findBy(['name' => $name]);
-
-        if (!$role) {
-            $role = $this->roleRepository->create($name);
+        if (empty($name)) {
+            throw new BadRequestException('Role name is empty');
         }
 
-        return $this->respond(['role' => $role], Response::HTTP_CREATED);
+        return $this->respond(['role' => $this->repository->firstOrCreate($name)], Response::HTTP_CREATED);
     }
 }

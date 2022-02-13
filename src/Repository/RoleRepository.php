@@ -19,6 +19,17 @@ class RoleRepository extends ServiceEntityRepository
         parent::__construct($registry, Role::class);
     }
 
+    public function firstOrCreate(string $name): Role
+    {
+        $role = $this->findBy(['name' => $name]);
+
+        if (!$role) {
+            $role = $this->create($name);
+        }
+
+        return $role;
+    }
+
     public function create(string $name): Role
     {
         $role = new Role();

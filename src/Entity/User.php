@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
-use JetBrains\PhpStorm\Pure;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Ignore;
@@ -18,7 +17,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\OneToOne(inversedBy: 'user', targetEntity: Employee::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'user', targetEntity: Employee::class, cascade: ['persist', 'remove'], fetch: 'EAGER')]
     #[ORM\JoinColumn(nullable: false)]
     private Employee $employee;
 
@@ -88,25 +87,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    #[Pure]
     public function getRoles(): array
     {
-        $roles = [];
+        $roles = ['ROLE_USER'];
 
-        // берём роль пользователя через Employee (связана с User)
         try {
+            // берём роль через Employee
             $currentRole = $this->employee->getRole()->getName();
-        } catch (Exception $e) {
-            $currentRole = null;
-        }
-
-        if (!empty($currentRole)) {
             $currentRole = 'ROLE_' . strtoupper($currentRole);
             $roles[] = $currentRole;
+        } catch (Exception) {
         }
-
-        // роли в симфони начинаются с ROLE_ (нерушимая конвенция)
-        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -125,12 +116,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Ignore]
     public function getUsername(): string
     {
-        return (string) $this->login;
+        return (string)$this->login;
     }
 
     #[Ignore]
     public function getUserIdentifier(): string
     {
-        return (string) $this->login;
+        return (string)$this->login;
     }
 }

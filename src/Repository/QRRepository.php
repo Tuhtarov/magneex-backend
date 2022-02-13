@@ -68,7 +68,7 @@ class QRRepository extends ServiceEntityRepository
         // удаляем просроченный токен
         if ($qr->getIsExpired()) {
             $this->getEntityManager()->remove($qr);
-            $this->getEntityManager()->flush();
+            $this->getEntityManager()->flush($qr);
             throw new RuntimeException("Invalid QR. Token is expired.");
         }
     }

@@ -129,24 +129,4 @@ class People
 
         return $this;
     }
-
-    /**
-     * Получить ассоциативный массив, представляющий данные человека
-     * @return array
-     */
-    #[Ignore]
-    public function getAssocData(): array
-    {
-        $date = $this->getBirthday()->format('Y-m-d');
-
-        return [
-            'id' => $this->getId(),
-            'name' => $this->getName(),
-            'family' => $this->getFamily(),
-            'patronymic' => $this->getPatronymic(),
-            'birthday' => $date,
-            'email' => $this->getEmail(),
-            'phone' => $this->getPhone()
-        ];
-    }
 }

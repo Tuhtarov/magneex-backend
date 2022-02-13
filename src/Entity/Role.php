@@ -46,7 +46,7 @@ class Role
     }
 
     /**
-     * @return Collection|Employee[]
+     * @return Collection
      */
     public function getEmployees(): Collection
     {

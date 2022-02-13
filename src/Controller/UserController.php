@@ -3,8 +3,6 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
-use App\Service\User\CurrentUser;
-use Exception;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,28 +21,23 @@ class UserController extends AbstractApiController
     {
         $users = $this->userRepository->findAll();
 
-        if (!empty($users)) {
-            return $this->respond(['users' => $users]);
+        if (empty($users)) {
+            throw new BadRequestException('Users is empty');
         }
 
-        throw new BadRequestException('Users is empty');
+        return $this->respond(['users' => $users]);
     }
 
     #[Route('/current', name: 'current', methods: ['GET'])]
-    public function current(CurrentUser $user): Response
+    public function current(): Response
     {
-        try {
-            $userData = $user->getAssoc();
-        } catch (Exception) {
-            throw new BadRequestException('User is not found');
+        $user = $this->getUser();
+
+        if ($user) {
+            return $this->respond(['user' => $user]);
         }
 
-        return $this->respond(['user' => $userData]);
-
-        /*
-        $user = $this->getUser();
-        return $this->respond(['user' => $user]);
-        */
+        throw new BadRequestException('Current user is not found');
     }
 
     #[Route('/create', name: 'create', methods: ['POST'])]
@@ -52,7 +45,7 @@ class UserController extends AbstractApiController
     {
         $userData = $request->request->all("user");
 
-        if ($userData) {
+        if (!empty($userData)) {
             $user = $this->userRepository->create($userData);
 
             if ($user) {
@@ -60,6 +53,6 @@ class UserController extends AbstractApiController
             }
         }
 
-        throw new BadRequestException('User is not created');
+        throw new BadRequestException('Creation error');
     }
 }

@@ -20,11 +20,11 @@ class EmployeeController extends AbstractApiController
     {
         $employees = $this->employeeRepository->findAll();
 
-        if (!empty($employees)) {
-            return $this->respond(['employees' => $employees]);
+        if (empty($employees)) {
+            throw $this->createNotFoundException('Employees is empty');
         }
 
-        throw $this->createNotFoundException('Employees is empty');
+        return $this->respond(['employees' => $employees]);
     }
 
     #[Route('/get/{id}', name: 'show', methods: ['GET'])]

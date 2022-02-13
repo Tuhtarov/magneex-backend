@@ -20,7 +20,8 @@ class Employee
     #[ORM\JoinColumn(nullable: false)]
     private $people;
 
-    #[ORM\ManyToOne(targetEntity: Role::class, inversedBy: 'employees')]
+    #[ORM\ManyToOne(targetEntity: Role::class, fetch: 'EAGER', inversedBy: 'employees')]
+    #[ORM\JoinColumn(nullable: false)]
     private $role;
 
     #[ORM\OneToOne(mappedBy: 'employee', targetEntity: User::class, cascade: ['persist', 'remove'])]

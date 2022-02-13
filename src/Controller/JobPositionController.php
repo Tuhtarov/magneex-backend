@@ -11,14 +11,18 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('api/job-positions', name: 'api_job_position')]
 class JobPositionController extends AbstractApiController
 {
-    public function __construct(private JobPositionRepository $jobPositionRepository)
+    public function __construct(private JobPositionRepository $repository)
     {
     }
 
     #[Route('/', name: 'all', methods: ['GET'])]
     public function index(): Response
     {
-        $positions = $this->jobPositionRepository->findAll();
+        $positions = $this->repository->findAll();
+
+        if (empty($positions)) {
+            throw new BadRequestException('Job positions is empty');
+        }
 
         return $this->respond(['jobPositions' => $positions]);
     }
@@ -28,12 +32,10 @@ class JobPositionController extends AbstractApiController
     {
         $name = $request->request->get('name');
 
-        if (!empty($name)) {
-            $position = $this->jobPositionRepository->firstOrCreate($name);
-
-            return $this->respond(['jobPosition' => $position], Response::HTTP_CREATED);
+        if (empty($name)) {
+            throw new BadRequestException('Creation error');
         }
 
-        throw new BadRequestException('Error create');
+        return $this->respond(['jobPosition' => $this->repository->firstOrCreate($name)], Response::HTTP_CREATED);
     }
 }

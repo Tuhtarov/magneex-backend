@@ -37,30 +37,44 @@ class AppFixtures extends Fixture
         ];
 
         $jobPositions = [
+            $this->createJobPosition($manager, 'Программист'),
             $this->createJobPosition($manager, 'Дизайнер'),
             $this->createJobPosition($manager, 'Сис админ'),
-            $this->createJobPosition($manager, 'Программист'),
             $this->createJobPosition($manager, 'Дотнетчик'),
         ];
 
         for ($i = 0; $i < $qty; $i++) {
             $people = new People();
-            $people
-                ->setName("Димка-$i")
-                ->setFamily("Новосёлов-$i")
-                ->setPatronymic("Моков-$i")
-                ->setPhone("12345678901")
-                ->setEmail('mock-dimka@gmail.cam')
-                ->setBirthday(new \DateTime());
+            $people->setBirthday(new \DateTime());
 
-            $employee = $this->createEmployee($manager, $people,
-                $roles[random_int(0, count($roles) - 1)],
-                $jobPositions[random_int(0, count($roles) - 1)]
-            );
+            if ($i === 0) {
+                $people
+                    ->setName("Александр")
+                    ->setFamily("Тухтаров")
+                    ->setPatronymic("Анатольевич")
+                    ->setPhone("8923228228")
+                    ->setEmail('stuxtarov@gmail.cam');
+            } else {
+                $people
+                    ->setName("Димка-$i")
+                    ->setFamily("Новосёлов-$i")
+                    ->setPatronymic("Моков-$i")
+                    ->setPhone("12345678901")
+                    ->setEmail('mock-dimka@gmail.cam');
+            }
 
-            $login = $employee->getRole()->getName();
+            if ($i === 0) {
+                $employee = $this->createEmployee($manager, $people, $roles[0], $jobPositions[0]);
+                $login = $employee->getRole()->getName();
+            } else {
+                $employee = $this->createEmployee($manager, $people,
+                    $roles[random_int(0, count($roles) - 1)],
+                    $jobPositions[random_int(0, count($roles) - 1)]
+                );
+                $login = $employee->getRole()->getName()  . $i;
+            }
 
-            $this->createUser($manager, $employee, $login . $i, $login . $i);
+            $this->createUser($manager, $employee, $login, $login);
 
             $manager->persist($people);
         }

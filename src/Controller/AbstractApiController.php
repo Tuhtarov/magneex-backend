@@ -5,8 +5,7 @@ namespace App\Controller;
 use App\Entity\Employee;
 use App\Entity\User;
 use Doctrine\Common\Annotations\AnnotationReader;
-use FOS\RestBundle\Controller\AbstractFOSRestController;
-use Symfony\Component\Form\FormInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -17,17 +16,8 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
-abstract class AbstractApiController extends AbstractFOSRestController
+abstract class AbstractApiController extends AbstractController
 {
-    protected function buildForm(string $type, $data = null, array $options = []) : FormInterface
-    {
-        $options = array_merge($options, [
-           'csrf_protection' => false
-        ]);
-
-        return $this->container->get('form.factory')->createNamed('', $type, $data, $options);
-    }
-
     /**
      * Получает связанную сущность People с текущего User.
      * @return Employee

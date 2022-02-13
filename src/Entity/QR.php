@@ -49,7 +49,8 @@ class QR
         return $this;
     }
 
-    #[Pure] public function isMyToken(string $token): bool
+    #[Pure]
+    public function isMyToken(string $token): bool
     {
         return $this->getToken() === $token;
     }
