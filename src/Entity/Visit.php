@@ -59,4 +59,9 @@ class Visit
 
         return $this;
     }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 }

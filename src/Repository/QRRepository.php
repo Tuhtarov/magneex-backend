@@ -6,6 +6,7 @@ use App\Entity\QR;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use RuntimeException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @method QR|null find($id, $lockMode = null, $lockVersion = null)
@@ -47,7 +48,7 @@ class QRRepository extends ServiceEntityRepository
         }
 
         if (is_null($qr)) {
-            throw new RuntimeException("QR not found");
+            throw new NotFoundHttpException("QR not found");
         }
 
         $this->verifyQR($qr, $token);

@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Employee;
 use App\Entity\Visit;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Query\Parameter;
@@ -22,18 +23,18 @@ class VisitRepository extends ServiceEntityRepository
         parent::__construct($registry, Visit::class);
     }
 
-    public function createVisit(Employee $employee): Visit
+    public function createVisit(Employee $employee, DateTime $currentTime = new DateTime()): Visit
     {
         $todayVisit = $this->findTodayVisit($employee);
 
         // если сегодня уже приходил, записываем дату окончания работы
         if ($todayVisit) {
-            $todayVisit->setEndWorkTime(new \DateTime());
+            $todayVisit->setEndWorkTime($currentTime);
             $visit = $todayVisit;
         } else {
             // регистрируем посещение, назначаем время прибытия
             $visit = new Visit();
-            $visit->setBeginWorkTime(new \DateTime());
+            $visit->setBeginWorkTime($currentTime);
             $visit->setEmployee($employee);
         }
 
@@ -58,5 +59,9 @@ class VisitRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function findHistoryByEmployee(Employee $employee)
+    {
     }
 }

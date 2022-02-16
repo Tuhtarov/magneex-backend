@@ -6,7 +6,6 @@ use App\Entity\QR;
 use App\Entity\User;
 use App\Repository\QRRepository;
 use App\Service\Centrifugo\Interface\IRealTimeServer;
-use App\Service\Visit\IVisitChecker;
 use App\Service\Visit\IVisitRecorder;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +17,6 @@ class QRController extends AbstractApiController
     public function __construct(
         private IRealTimeServer $realTimeServer,
         private IVisitRecorder  $visitRecorder,
-        private IVisitChecker   $visitChecker,
         private QRRepository    $qrRepo
     ) {
     }
@@ -55,16 +53,12 @@ class QRController extends AbstractApiController
     {
         $qr = $this->qrRepo->fetchQrBy($token, $id);
         $employee = $this->getCurrentEmployee();
-        $workIsCompleted = $this->visitChecker->todayWorkIsCompleted($employee);
 
-        if (!$workIsCompleted) {
-            $visit = $this->visitRecorder->record($employee, $qr); // учитываем посещение
-            $this->publishQR($this->qrRepo->create());
+        // учитываем посещение
+        $visit = $this->visitRecorder->record($employee, $qr);
+        $this->publishQR($this->qrRepo->create());
 
-            return $this->respond(['visit' => $visit], Response::HTTP_CREATED);
-        }
-
-        return $this->respond(['message' => 'Your work is completed'], Response::HTTP_CONFLICT);
+        return $this->respond(['visit' => $visit], Response::HTTP_CREATED);
     }
 
     private function publishQr(QR $qr): void
