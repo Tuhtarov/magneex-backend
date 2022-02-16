@@ -61,7 +61,10 @@ class VisitRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function findHistoryByEmployee(Employee $employee)
+    public function findHistoryByEmployee(Employee $employee): array
     {
+        return $this->findBy([
+            'employee' => $employee
+        ]);
     }
 }

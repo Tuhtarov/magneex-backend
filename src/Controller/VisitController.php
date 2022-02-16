@@ -14,11 +14,20 @@ class VisitController extends AbstractApiController
     }
 
     #[Route('/today-history', name: 'today_history', methods: ['GET'])]
-    public function index(): Response
+    public function todayHistory(): Response
     {
         $employee = $this->getCurrentEmployee();
         $visit = $this->repository->findTodayVisit($employee);
 
         return $this->respond(['visit' => $visit]);
+    }
+
+    #[Route('/my-all-history', name: 'my_all_history', methods: ['GET'])]
+    public function myAllHistory(): Response
+    {
+        $employee = $this->getCurrentEmployee();
+        $visits = $this->repository->findHistoryByEmployee($employee);
+
+        return $this->respond(['visits' => $visits]);
     }
 }
