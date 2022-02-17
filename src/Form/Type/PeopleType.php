@@ -31,8 +31,7 @@ class PeopleType extends AbstractType
         $resolver->setDefaults([
             'data_class' => People::class,
             'csrf_protection' => false,
-            // допуск наличия дополнительных полей
-            'allow_extra_fields' => true
+            'allow_extra_fields' => true // допуск наличия дополнительных полей
         ]);
     }
 }

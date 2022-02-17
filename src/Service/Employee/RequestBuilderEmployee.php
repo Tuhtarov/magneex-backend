@@ -4,70 +4,48 @@ namespace App\Service\Employee;
 
 use App\Entity\Employee;
 use App\Entity\JobPosition;
+use App\Entity\People;
 use App\Entity\Role;
 use App\Form\Type\PeopleType;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
+use App\Repository\JobPositionRepository;
+use App\Repository\RoleRepository;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class RequestBuilderEmployee extends BuilderEmployee
 {
     public function __construct(
-        private FormFactoryInterface   $formFactory,
-        private EntityManagerInterface $manager,
-        private BuilderEmployee        $builderEmployee
+        private FormFactoryInterface  $formFactory,
+        private RoleRepository        $roleRepo,
+        private JobPositionRepository $jobPosRepo,
+        private BuilderEmployee       $builderEmployee
     )
     {
         parent::__construct();
     }
 
-    public function createFromRequest(Request $request): ?Employee
+    public function createFromArray(array $employee): Employee
     {
-        $form = $this->buildForm(PeopleType::class)->handleRequest($request);
-        $peopleIsCreated = $form->isSubmitted() && $form->isValid();
+        $form = $this->formFactory->create(PeopleType::class)->submit($employee);
 
-        if ($peopleIsCreated) {
-            try {
-                $people = $form->getData();
-                $role = $this->getRoleFromRequest($request);
-                $position = $this->getJobPositionFromRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $people = $form->getData();
+            $role = $this->roleRepo->find($employee['role_id']);
+            $position = $this->jobPosRepo->find($employee['job_position_id']);
 
-                return $this->builderEmployee
-                    ->create($people)
-                    ->setRole($role)
-                    ->setJobPosition($position)
-                    ->build();
-
-            } catch (Exception) {
-                return null;
-            }
+            return $this->buildEmployee($people, $role, $position);
         }
 
-        return null;
+        throw new BadRequestHttpException('Employee is not created');
     }
 
-    private function getRoleFromRequest(Request $request): ?Role
+    private function buildEmployee(People $people, ?Role $role, ?JobPosition $jb): Employee
     {
-        $id = $request->request->get(Employee::ROLE_FK_NAME);
-
-        return is_int($id) ?
-            $this->manager->getRepository(Role::class)->find($id) : null;
-    }
-
-    private function getJobPositionFromRequest(Request $request): ?JobPosition
-    {
-        $id = $request->request->get(Employee::JOB_POSITION_FK_NAME);
-
-        return is_int($id) ?
-            $this->manager->getRepository(JobPosition::class)->find($id) : null;
-    }
-
-    private function buildForm(string $type): FormInterface
-    {
-        $options = ['csrf_protection' => false];
-        return $this->formFactory->createNamed('', $type, null, $options);
+        return $this->builderEmployee
+            ->create($people)
+            ->setRole($role)
+            ->setJobPosition($jb)
+            ->build();
     }
 }
 

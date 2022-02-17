@@ -40,9 +40,6 @@ class Employee
         $this->visits = new ArrayCollection();
     }
 
-    public const JOB_POSITION_FK_NAME = 'job_position_id';
-    public const ROLE_FK_NAME = 'role_id';
-
     public function getId(): ?int
     {
         return $this->id;

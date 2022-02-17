@@ -7,8 +7,10 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 #[Route('/api/roles', name: 'api_roles_')]
+#[IsGranted('ROLE_ADMIN')]
 class RoleController extends AbstractApiController
 {
     public function __construct(private RoleRepository $repository)

@@ -6,7 +6,6 @@ use App\Entity\Employee;
 use App\Service\Employee\RequestBuilderEmployee;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @method Employee|null find($id, $lockMode = null, $lockVersion = null)
@@ -22,23 +21,25 @@ class EmployeeRepository extends ServiceEntityRepository
         parent::__construct($registry, Employee::class);
     }
 
-    public function createFromRequest(Request $request): ?Employee
+    public function createFromArray(array $employeeData): Employee
     {
-        $employee = $this->builderEmployee->createFromRequest($request);
+        $employee = $this->builderEmployee->createFromArray($employeeData);
 
-        if ($employee) {
-            $this->getEntityManager()->persist($employee);
-            $this->getEntityManager()->flush($employee);
-            return $employee;
-        }
-
-        return null;
+        return $this->saveEntity($employee);
     }
 
     public function deleteEntity(Employee $employee): void
     {
         $this->getEntityManager()->remove($employee);
         $this->getEntityManager()->flush($employee);
+    }
+
+    public function saveEntity(Employee $employee): Employee
+    {
+        $this->getEntityManager()->persist($employee);
+        $this->getEntityManager()->flush($employee);
+
+        return $employee;
     }
 }
 

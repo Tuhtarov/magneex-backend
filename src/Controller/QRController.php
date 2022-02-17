@@ -21,7 +21,6 @@ class QRController extends AbstractApiController
     ) {
     }
 
-
     #[Route('/connection', name: 'subscribe', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function subscribeConnection(): Response

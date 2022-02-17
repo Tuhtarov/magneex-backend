@@ -48,25 +48,36 @@ class AppFixtures extends Fixture
             $people->setBirthday(new \DateTime());
 
             if ($i === 0) {
+                // админ login: 'admin', pwd: 'admin'
                 $people
                     ->setName("Александр")
                     ->setFamily("Тухтаров")
                     ->setPatronymic("Анатольевич")
                     ->setPhone("8923228228")
                     ->setEmail('stuxtarov@gmail.cam');
+
+                $employee = $this->createEmployee($manager, $people, $roles[0], $jobPositions[0]);
+                $login = $employee->getRole()->getName();
+            } else if ($i === 1) {
+                // сотрудник login: 'employee', pwd: 'employee'
+                $people
+                    ->setFamily("Козловских")
+                    ->setName("Вячеслав")
+                    ->setPatronymic("Вячеславович")
+                    ->setPhone("13371118901")
+                    ->setEmail('mock-employee@gmail.cam');
+
+                $employee = $this->createEmployee($manager, $people, $roles[1], $jobPositions[3]);
+                $login = $employee->getRole()->getName();
             } else {
+                // рандомный дмитрий
                 $people
                     ->setName("Димка-$i")
                     ->setFamily("Новосёлов-$i")
                     ->setPatronymic("Моков-$i")
                     ->setPhone("12345678901")
-                    ->setEmail('mock-dimka@gmail.cam');
-            }
+                    ->setEmail("mock-dimka$i@gmail.cam");
 
-            if ($i === 0) {
-                $employee = $this->createEmployee($manager, $people, $roles[0], $jobPositions[0]);
-                $login = $employee->getRole()->getName();
-            } else {
                 $employee = $this->createEmployee($manager, $people,
                     $roles[random_int(0, count($roles) - 1)],
                     $jobPositions[random_int(0, count($roles) - 1)]
@@ -75,7 +86,6 @@ class AppFixtures extends Fixture
             }
 
             $this->createUser($manager, $employee, $login, $login);
-
             $manager->persist($people);
         }
     }

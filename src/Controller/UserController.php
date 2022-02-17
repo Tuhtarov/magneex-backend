@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 #[Route('/api/users', name: 'api_user_')]
 class UserController extends AbstractApiController
@@ -17,6 +18,7 @@ class UserController extends AbstractApiController
     }
 
     #[Route('/', name: 'all', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function index(): Response
     {
         $users = $this->userRepository->findAll();
@@ -29,6 +31,7 @@ class UserController extends AbstractApiController
     }
 
     #[Route('/current', name: 'current', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function current(): Response
     {
         $user = $this->getUser();
@@ -41,6 +44,7 @@ class UserController extends AbstractApiController
     }
 
     #[Route('/create', name: 'create', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request): Response
     {
         $userData = $request->request->all("user");

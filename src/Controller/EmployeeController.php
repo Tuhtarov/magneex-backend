@@ -4,21 +4,22 @@ namespace App\Controller;
 
 use App\Entity\Employee;
 use App\Repository\EmployeeRepository;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/employees', name: 'api_employees_')]
+#[IsGranted('ROLE_ADMIN')]
 class EmployeeController extends AbstractApiController
 {
-    public function __construct(private EmployeeRepository $employeeRepository)
+    public function __construct(private EmployeeRepository $repository)
     {}
 
     #[Route('/', name: 'all', methods: ['GET'])]
     public function index(): Response
     {
-        $employees = $this->employeeRepository->findAll();
+        $employees = $this->repository->findAll();
 
         if (empty($employees)) {
             throw $this->createNotFoundException('Employees is empty');
@@ -27,7 +28,7 @@ class EmployeeController extends AbstractApiController
         return $this->respond(['employees' => $employees]);
     }
 
-    #[Route('/get/{id}', name: 'show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Employee $employee): Response
     {
         return $this->respond(['employee' => $employee]);
@@ -36,7 +37,7 @@ class EmployeeController extends AbstractApiController
     #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(Employee $employee): Response
     {
-        $this->employeeRepository->deleteEntity($employee);
+        $this->repository->deleteEntity($employee);
 
         return $this->respond(['message' => "Employee deleted"]);
     }
@@ -51,13 +52,9 @@ class EmployeeController extends AbstractApiController
     #[Route('/create', name: 'create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        $employee = $this->employeeRepository->createFromRequest($request);
+        $employee = $this->repository->createFromArray($request->toArray());
 
-        if ($employee) {
-            return $this->respond(['employee' => $employee]);
-        }
-
-        throw new BadRequestException('Employee is not created');
+        return $this->respond(['employee' => $employee]);
     }
 }
 

@@ -3,8 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\JobPosition;
+use App\Form\Type\JobPositionType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @method JobPosition|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,31 +18,25 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class JobPositionRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private FormFactoryInterface $formFactory)
     {
         parent::__construct($registry, JobPosition::class);
     }
 
-    public function firstOrCreate(string $name): JobPosition
-    {
-        $position = $this->findOneBy(['name' => $name]);
 
-        if (!$position) {
-            $position = $this->create($name);
+    public function createByArray(?array $jobPositionData): JobPosition
+    {
+        $form = $this->formFactory->create(JobPositionType::class)->submit($jobPositionData);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $jobPosition = $form->getData();
+            $this->getEntityManager()->persist($jobPosition);
+            $this->getEntityManager()->flush($jobPosition);
+
+            return $jobPosition;
         }
 
-        return $position;
-    }
-
-    private function create(string $name): JobPosition
-    {
-        $position = new JobPosition();
-        $position->setName($name);
-
-        $this->getEntityManager()->persist($position);
-        $this->getEntityManager()->flush($position);
-
-        return $position;
+        throw new BadRequestException('JobPosition is not created. Invalid param.');
     }
 }
 
