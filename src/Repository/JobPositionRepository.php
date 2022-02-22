@@ -8,7 +8,6 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @method JobPosition|null find($id, $lockMode = null, $lockVersion = null)
@@ -24,7 +23,7 @@ class JobPositionRepository extends ServiceEntityRepository
     }
 
 
-    public function createByArray(?array $jobPositionData): JobPosition
+    public function createFromArray(?array $jobPositionData): JobPosition
     {
         $form = $this->formFactory->create(JobPositionType::class)->submit($jobPositionData);
 

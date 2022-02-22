@@ -6,11 +6,19 @@ use App\Repository\VisitRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/visit', name: 'api_visit_')]
+#[Route('/api/visits', name: 'api_visit_')]
 class VisitController extends AbstractApiController
 {
     public function __construct(private VisitRepository $repository)
     {
+    }
+
+    #[Route('/', name: 'all_history', methods: ['GET'])]
+    public function index(): Response
+    {
+        $visits = $this->repository->findAll();
+
+        return $this->respond(['visits' => $visits]);
     }
 
     #[Route('/today-history', name: 'today_history', methods: ['GET'])]
