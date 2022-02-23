@@ -3,8 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\VisitRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: VisitRepository::class)]
 class Visit
@@ -21,12 +21,26 @@ class Visit
     private $end_work_time;
 
     #[ORM\ManyToOne(targetEntity: Employee::class, inversedBy: 'visits')]
-    #[Ignore]
     private $employee;
 
-    public function getBeginWorkTime(): ?\DateTimeInterface
+    public function getCurrentTime(): DateTime
     {
-        return $this->begin_work_time;
+        return new DateTime();
+    }
+
+    public function getWorkDate(): ?string
+    {
+        return $this->begin_work_time?->format('Y.m.d');
+    }
+
+    public function getBeginWorkTime(): ?string
+    {
+        return $this->begin_work_time?->format('H:i:s');
+    }
+
+    public function getEndWorkTime(): ?string
+    {
+        return $this->end_work_time?->format('H:i:s');
     }
 
     public function setBeginWorkTime(?\DateTimeInterface $begin_work_time): self
@@ -34,11 +48,6 @@ class Visit
         $this->begin_work_time = $begin_work_time;
 
         return $this;
-    }
-
-    public function getEndWorkTime(): ?\DateTimeInterface
-    {
-        return $this->end_work_time;
     }
 
     public function setEndWorkTime(?\DateTimeInterface $end_work_time): self

@@ -2,9 +2,9 @@
 
 namespace App\Service\Visit;
 
-use App\DTO\CurrentVisitDTO;
 use App\Entity\Employee;
 use App\Entity\QR;
+use App\Entity\Visit;
 
 interface IVisitRecorder
 {
@@ -13,7 +13,7 @@ interface IVisitRecorder
      *
      * @param Employee $employee
      * @param QR $qr
-     * @return CurrentVisitDTO
+     * @return Visit
      */
-    public function record(Employee $employee, QR $qr): CurrentVisitDTO;
+    public function record(Employee $employee, QR $qr): Visit;
 }

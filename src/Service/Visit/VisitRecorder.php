@@ -2,7 +2,6 @@
 
 namespace App\Service\Visit;
 
-use App\DTO\CurrentVisitDTO;
 use App\Entity\Employee;
 use App\Entity\QR;
 use App\Entity\Visit;
@@ -16,7 +15,7 @@ class VisitRecorder implements IVisitRecorder
     {
     }
 
-    public function record(Employee $employee, QR $qr): CurrentVisitDTO
+    public function record(Employee $employee, QR $qr): Visit
     {
         $workIsCompleted = $this->visitChecker->todayWorkIsCompleted($employee);
 
@@ -24,13 +23,11 @@ class VisitRecorder implements IVisitRecorder
             throw new ConflictHttpException('Your work is completed');
         }
 
-        $currentTime = new DateTime();
-        $visit = $this->doctrine->getRepository(Visit::class)->createVisit($employee, $currentTime);
-        $currentVisitDto = new CurrentVisitDTO($visit, $currentTime);
+        $visit = $this->doctrine->getRepository(Visit::class)->createVisit($employee);
 
         $this->doctrine->remove($qr);
-        $this->doctrine->flush();
+        $this->doctrine->flush($qr);
 
-        return $currentVisitDto;
+        return $visit;
     }
 }

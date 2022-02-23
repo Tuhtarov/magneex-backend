@@ -30,9 +30,8 @@ class QRController extends AbstractApiController
         $this->realTimeServer->subscribe($user);
         $connectionConfig = $this->realTimeServer->getConfigForSubscriber($user);
 
-        // публикуем QR
         $qr = $this->qrRepo->create();
-        $this->publishQr($qr);
+        $this->publishQr($qr); // публикуем QR
 
         return $this->respond(['config' => $connectionConfig, 'qr' => $qr], Response::HTTP_CREATED);
     }
@@ -47,15 +46,14 @@ class QRController extends AbstractApiController
         return $this->respond(['message' => "Unsubscribed user: {$user->getLogin()}"]);
     }
 
-    #[Route('/scan/{token}/{id<\d+>?}', name: 'scan', methods: ['GET'])]
-    public function scanQr(string $token, ?int $id = null): Response
+    #[Route('/scan/{token}', name: 'scan', methods: ['GET'])]
+    public function scanQr(string $token): Response
     {
-        $qr = $this->qrRepo->fetchQrBy($token, $id);
+        $qr = $this->qrRepo->fetchByToken($token);
         $employee = $this->getCurrentEmployee();
+        $visit = $this->visitRecorder->record($employee, $qr); // регистрируем посещение у текущего сотрудника
 
-        // учитываем посещение
-        $visit = $this->visitRecorder->record($employee, $qr);
-        $this->publishQR($this->qrRepo->create());
+        $this->publishQR($this->qrRepo->create()); // публикуем новый QR
 
         return $this->respond(['visit' => $visit], Response::HTTP_CREATED);
     }

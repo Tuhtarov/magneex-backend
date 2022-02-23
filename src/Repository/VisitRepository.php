@@ -23,18 +23,18 @@ class VisitRepository extends ServiceEntityRepository
         parent::__construct($registry, Visit::class);
     }
 
-    public function createVisit(Employee $employee, DateTime $currentTime = new DateTime()): Visit
+    public function createVisit(Employee $employee, DateTime $time = new DateTime()): Visit
     {
         $todayVisit = $this->findTodayVisit($employee);
 
-        // если сегодня уже приходил, записываем дату окончания работы
+        // если сегодня уже приходил, записываем время окончания
         if ($todayVisit) {
-            $todayVisit->setEndWorkTime($currentTime);
+            $todayVisit->setEndWorkTime($time);
             $visit = $todayVisit;
         } else {
             // регистрируем посещение, назначаем время прибытия
             $visit = new Visit();
-            $visit->setBeginWorkTime($currentTime);
+            $visit->setBeginWorkTime($time);
             $visit->setEmployee($employee);
         }
 

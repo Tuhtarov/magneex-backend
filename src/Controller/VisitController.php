@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Employee;
 use App\Repository\VisitRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,11 +22,10 @@ class VisitController extends AbstractApiController
         return $this->respond(['visits' => $visits]);
     }
 
-    #[Route('/today-history', name: 'today_history', methods: ['GET'])]
-    public function todayHistory(): Response
+    #[Route('/today-history/{id<\d+>?}', name: 'today_history', methods: ['GET'])]
+    public function todayHistory(?Employee $employee): Response
     {
-        $employee = $this->getCurrentEmployee();
-        $visit = $this->repository->findTodayVisit($employee);
+        $visit = $this->repository->findTodayVisit($employee ?? $this->getCurrentEmployee());
 
         return $this->respond(['visit' => $visit]);
     }

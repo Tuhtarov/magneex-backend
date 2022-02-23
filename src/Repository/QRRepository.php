@@ -32,20 +32,10 @@ class QRRepository extends ServiceEntityRepository
         return $qr;
     }
 
-    /**
-     * Получить QR по токену, либо по id.
-     * (поиск по id быстрее, но если он не был передан, то выполняется поиск по токену)
-     * @param string $token
-     * @param int|null $id
-     * @return QR
-     */
-    public function fetchQrBy(string $token, ?int $id): QR
+    public function fetchByToken(string $token): QR
     {
-        if ($id) {
-            $qr = $this->find($id);
-        } else {
-            $qr = $this->findOneBy(['token' => $token]);
-        }
+
+        $qr = $this->findOneBy(['token' => $token]);
 
         if (is_null($qr)) {
             throw new NotFoundHttpException("QR not found");
@@ -56,20 +46,12 @@ class QRRepository extends ServiceEntityRepository
         return $qr;
     }
 
-    /**
-     * Проверка на пригодность токена.
-     */
-    private function verifyQR(QR $qr, string $token): void
+    private function verifyQR(QR $qr): void
     {
-        // если была попытка обмануть систему
-        if (!$qr->isMyToken($token)) {
-            throw new RuntimeException("Invalid QR. Token not equal in db record");
-        }
-
-        // удаляем просроченный токен
         if ($qr->getIsExpired()) {
             $this->getEntityManager()->remove($qr);
             $this->getEntityManager()->flush($qr);
+
             throw new RuntimeException("Invalid QR. Token is expired.");
         }
     }
