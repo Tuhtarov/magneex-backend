@@ -6,6 +6,7 @@ use App\Entity\Employee;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
@@ -16,44 +17,30 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  */
 class UserRepository extends ServiceEntityRepository
 {
-
     public function __construct(ManagerRegistry $registry, private UserPasswordHasherInterface $pwdHash)
     {
         parent::__construct($registry, User::class);
     }
 
-    public function create(array $data): ?User
+    public function create(string $login, string $password, int $employeeId, bool $isActivated = true): User
     {
-        $dataExists = !empty($data['login']) && !empty($data['password']) && !empty($data['employeeId']);
+        $employee = $this->getEntityManager()->getRepository(Employee::class)->find($employeeId);
 
-        if (!$dataExists) {
-            return null;
-        }
-
-        $manager = $this->getEntityManager();
-        $employee = $manager->getRepository(Employee::class)->find($data['employeeId']);
-
-        if ($employee) {
+        if ($employee && !$employee->getUser()) {
             $user = new User();
-            $user->setLogin($data['login'])->setEmployee($employee);
 
-            $activateValue = isset($data['activated']) && ($data['activated'] === true || $data['activated'] === 'true');
-            $user->setActivated($activateValue);
+            $user
+                ->setLogin($login)
+                ->setPassword($this->pwdHash->hashPassword($user, $password))
+                ->setEmployee($employee)
+                ->setActivated($isActivated);
 
-            $this->setPassword($user, $data['password']);
-
-            $manager->persist($user);
-            $manager->flush($user);
+            $this->getEntityManager()->persist($user);
+            $this->getEntityManager()->flush($user);
 
             return $user;
         }
 
-        return null;
-    }
-
-    private function setPassword(User $user, string $password): void
-    {
-        $hashedPassword = $this->pwdHash->hashPassword($user, $password);
-        $user->setPassword($hashedPassword);
+        throw new BadRequestHttpException('Employee if not found or account already exist.');
     }
 }

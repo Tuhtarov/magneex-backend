@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
+use phpDocumentor\Reflection\Types\This;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,7 +14,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 class UserController extends AbstractApiController
 {
 
-    public function __construct(private UserRepository $userRepository)
+    public function __construct(private UserRepository $repository)
     {
     }
 
@@ -21,7 +22,7 @@ class UserController extends AbstractApiController
     #[IsGranted('ROLE_ADMIN')]
     public function index(): Response
     {
-        $users = $this->userRepository->findAll();
+        $users = $this->repository->findAll();
 
         if (empty($users)) {
             throw new BadRequestException('Users is empty');
@@ -47,16 +48,14 @@ class UserController extends AbstractApiController
     #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request): Response
     {
-        $userData = $request->request->all("user");
+        $data = $request->toArray();
 
-        if (!empty($userData)) {
-            $user = $this->userRepository->create($userData);
+        $user = $this->repository->create(
+            $data['login'],
+            $data['password'],
+            (int)$data['employeeId']
+        );
 
-            if ($user) {
-                return $this->respond(['user' => $user]);
-            }
-        }
-
-        throw new BadRequestException('Creation error');
+        return $this->respond(['user' => $user]);
     }
 }
