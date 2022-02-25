@@ -22,10 +22,11 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
-    public function create(string $login, string $password, int $employeeId, bool $isActivated = true): User
+    public function create(string $login, string $password, int $employeeId, bool $activated = true): User
     {
         $employee = $this->getEntityManager()->getRepository(Employee::class)->find($employeeId);
 
+        // если сотрудник найден и если у него нет аккаунта, создаём
         if ($employee && !$employee->getUser()) {
             $user = new User();
 
@@ -33,7 +34,7 @@ class UserRepository extends ServiceEntityRepository
                 ->setLogin($login)
                 ->setPassword($this->pwdHash->hashPassword($user, $password))
                 ->setEmployee($employee)
-                ->setActivated($isActivated);
+                ->setActivated($activated);
 
             $this->getEntityManager()->persist($user);
             $this->getEntityManager()->flush($user);

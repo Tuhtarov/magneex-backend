@@ -42,10 +42,13 @@ class EmployeeController extends AbstractApiController
         return $this->respond(['message' => "Employee deleted"]);
     }
 
-    #[Route('/edit/{id}', name: 'edit', methods: ['UPDATE'])]
-    public function edit(Employee $employee): Response
+    #[Route('/edit/{id}', name: 'edit', methods: ['POST'])]
+    public function edit(Employee $employee, Request $request): Response
     {
-        // TODO допилить редактирование
+        $newData = $request->toArray()['employee'] ?? null;
+
+        $employee = $this->repository->edit($employee, $newData);
+
         return $this->respond(['employee' => $employee]);
     }
 

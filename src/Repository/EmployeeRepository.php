@@ -24,6 +24,7 @@ class EmployeeRepository extends ServiceEntityRepository
     public function __construct(
         ManagerRegistry               $registry,
         private FormFactoryInterface  $formFactory,
+        private PeopleRepository $peopleRepo,
         private JobPositionRepository $jobPosRepo,
         private RoleRepository        $roleRepo,
         private BuilderEmployee       $builderEmployee
@@ -71,6 +72,38 @@ class EmployeeRepository extends ServiceEntityRepository
 
     public function saveEntity(Employee $employee): Employee
     {
+        $this->getEntityManager()->persist($employee);
+        $this->getEntityManager()->flush($employee);
+
+        return $employee;
+    }
+
+    /**
+     * data: [people_data, role_id, job_position_id]
+     * @param Employee $employee
+     * @param array $data
+     * @return Employee
+     */
+    public function edit(Employee $employee, array $data): Employee
+    {
+        $peopleData = $data['people_data'] ?? null;
+        $roleId = $data['role_id'] ?? null;
+        $jobPositionId = $data['job_position_id'] ?? null;
+
+        if (is_array($peopleData) && $employee->getPeople()) {
+            $this->peopleRepo->edit($employee->getPeople(), $peopleData);
+        }
+
+        if (is_int($roleId)) {
+            $role = $this->roleRepo->find($roleId);
+            $role && $employee->setRole($role);
+        }
+
+        if (is_int($jobPositionId)) {
+            $jb = $this->jobPosRepo->find($jobPositionId);
+            $jb && $employee->setJobPosition($jb);
+        }
+
         $this->getEntityManager()->persist($employee);
         $this->getEntityManager()->flush($employee);
 
