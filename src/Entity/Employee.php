@@ -31,7 +31,7 @@ class Employee
     #[ORM\ManyToOne(targetEntity: JobPosition::class, inversedBy: 'employees')]
     private $jobPosition;
 
-    #[ORM\OneToMany(mappedBy: 'employee', targetEntity: Visit::class)]
+    #[ORM\OneToMany(mappedBy: 'employee', targetEntity: Visit::class, cascade: ['persist', 'remove'])]
     #[Ignore]
     private $visits;
 
