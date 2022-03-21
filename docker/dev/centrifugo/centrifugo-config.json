@@ -5,7 +5,7 @@
   "admin_secret": "secret",
   "admin": true,
   "allowed_origins": [
-    "http://localhost:8000",
-    "http://localhost:8080"
+    "http://frontend:8000",
+    "http://backend:8080"
   ]
 }
