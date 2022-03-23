@@ -4,7 +4,7 @@ RUN apk update && apk add bash
 
 COPY centrifugo-config.json /centrifugo
 
-CMD ["centrifugo", "--config=centrifugo-config.json"]
+EXPOSE 3000:3000
 
-EXPOSE 3000:80
+CMD ["centrifugo", "--config=centrifugo-config.json", "--port=3000"]
 

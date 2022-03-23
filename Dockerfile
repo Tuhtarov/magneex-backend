@@ -5,9 +5,9 @@ COPY php-local.ini "$PHP_INI_DIR/conf.d/php-local.ini"
 
 RUN \
 	mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" && \
-    apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update && \
+    	apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update && \
 	apt-get install -y \
-	git unzip wget && \
+	git unzip wget vim && \
 	wget https://get.symfony.com/cli/installer -O - | bash && \
 	mv /root/.symfony/bin/symfony /usr/local/bin/symfony && \
 	docker-php-ext-install pdo_mysql && \
@@ -17,13 +17,16 @@ RUN \
 
 WORKDIR /home/user/app
 
+COPY . .
+
 RUN \
-    git clone https://github.com/Tuhtarov/magneex-backend . && \
-	git config --global user.email "tukhtarov.alexandr@gmail.com" && \
-	git config --global user.name "Tuhtarov" && \
-    composer install && \
-    symfony console lexik:jwt:generate-keypair
+	rm composer.lock symfony.lock && \
+	composer install && \
+	symfony console lexik:jwt:generate-keypair --overwrite
 
-EXPOSE 8080:8080
+EXPOSE 80:80
 
-CMD ["symfony", "server:start", "--no-tls", "--port=8080"]
+VOLUME [ "src", "config" ]
+
+CMD ["symfony", "server:start", "--no-tls", "--port=80"]
+
