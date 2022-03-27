@@ -63,8 +63,25 @@ class VisitRepository extends ServiceEntityRepository
 
     public function findHistoryByEmployee(Employee $employee): array
     {
-        return $this->findBy([
-            'employee' => $employee
-        ]);
+        return $employee->getVisits()->toArray();
+    }
+
+    public function findTardyByEmployee(Employee $employee): array
+    {
+        $jobBeginTime = $employee->getJobPosition()->getBeginWorkTime();
+        $visits = $employee->getVisits()->toArray();
+        $tardies = []; // опоздания
+
+        /** @var Visit $visit */
+        foreach ($visits as $visit) {
+            $visitBegin = $visit->getBeginWorkTimeFull();
+            $jobBeginDateTime = new \DateTime($visitBegin->format("Y-m-d") . " $jobBeginTime");
+
+            if ($visitBegin->getTimestamp() > $jobBeginDateTime->getTimestamp()) {
+                $tardies[] = $visit;
+            }
+        }
+
+        return $tardies;
     }
 }

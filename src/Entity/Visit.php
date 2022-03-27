@@ -43,6 +43,16 @@ class Visit
         return $this->end_work_time?->format('H:i:s');
     }
 
+    public function getBeginWorkTimeFull(): DateTime
+    {
+        return $this->begin_work_time;
+    }
+
+    public function getEndWorkTimeFull(): DateTime
+    {
+        return $this->end_work_time;
+    }
+
     public function setBeginWorkTime(?\DateTimeInterface $begin_work_time): self
     {
         $this->begin_work_time = $begin_work_time;

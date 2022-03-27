@@ -9,6 +9,7 @@ use App\Entity\Role;
 use App\Form\Type\PeopleType;
 use App\Service\Employee\BuilderEmployee;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -24,8 +25,9 @@ class EmployeeRepository extends ServiceEntityRepository
     public function __construct(
         ManagerRegistry               $registry,
         private FormFactoryInterface  $formFactory,
-        private PeopleRepository $peopleRepo,
+        private PeopleRepository      $peopleRepo,
         private JobPositionRepository $jobPosRepo,
+        private VisitRepository       $visitRepo,
         private RoleRepository        $roleRepo,
         private BuilderEmployee       $builderEmployee
     )
@@ -108,6 +110,20 @@ class EmployeeRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush($employee);
 
         return $employee;
+    }
+
+    public function findAllOnline(): array
+    {
+        $today = (new \DateTime())->format('Y-m-d');
+
+        return $this->getEntityManager()->createQuery(
+            'SELECT e
+             FROM App\Entity\Employee e
+             JOIN e.visits v
+             WHERE v.begin_work_time like :date AND v.end_work_time IS NULL')
+            ->setParameter('date', $today . '%')
+            ->execute();
+
     }
 }
 

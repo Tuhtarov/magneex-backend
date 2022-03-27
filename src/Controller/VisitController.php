@@ -14,13 +14,24 @@ class VisitController extends AbstractApiController
     {
     }
 
-    #[Route('/', name: 'all_history', methods: ['GET'])]
-    public function index(): Response
+    #[Route('/{id<\d+>?}', name: 'all_history', methods: ['GET'])]
+    public function index(?Employee $employee): Response
     {
-        $visits = $this->repository->findAll();
+        $visits = $employee ?
+            $this->repository->findHistoryByEmployee($employee) : $this->repository->findAll();
 
         return $this->respond(['visits' => $visits]);
     }
+
+    // переработки
+    #[Route('/tardies/{id<\d+>?}', name: 'tardy', methods: ['GET'])]
+    public function tardies(Employee $employee): Response
+    {
+        $visits = $this->repository->findTardyByEmployee($employee);
+
+        return $this->respond(['tardies' => $visits]);
+    }
+
 
     #[Route('/today-history/{id<\d+>?}', name: 'today_history', methods: ['GET'])]
     public function todayHistory(?Employee $employee): Response

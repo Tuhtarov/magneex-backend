@@ -33,6 +33,8 @@ docker build -p 3000:3000 -t magneex-centrifuge centrifuge/
 symfony console lexik:jwt:generate-keypair --overwrite
 ```
 
+### Запускаем локальный сервер
+symfony server:start --no-tls --port=8080
 
 
 ## 2 вариант: запуск backend сервера в docker контейнере на 8000 порту
@@ -55,9 +57,6 @@ symfony console doctrine:migrations:migrate
 ```
 ```shell
 symfony console doctrine:fixtures:load 
-```
-```shell
-symfony console lexik:jwt:generate-keypair --overwrite
 ```
 ```
 exit # уходим обратно в host машину

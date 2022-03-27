@@ -28,6 +28,15 @@ class EmployeeController extends AbstractApiController
         return $this->respond(['employees' => $employees]);
     }
 
+    // сотрудники в онлайне
+    #[Route('/online', name: 'online', methods: ['GET'])]
+    public function online(): Response
+    {
+        $employees = $this->repository->findAllOnline();
+
+        return $this->respond(['employees' => $employees]);
+    }
+
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Employee $employee): Response
     {
