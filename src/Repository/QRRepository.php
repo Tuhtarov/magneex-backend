@@ -41,7 +41,7 @@ class QRRepository extends ServiceEntityRepository
             throw new NotFoundHttpException("QR not found");
         }
 
-        $this->verifyQR($qr, $token);
+        $this->verifyQR($qr);
 
         return $qr;
     }

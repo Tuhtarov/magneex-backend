@@ -123,7 +123,6 @@ class EmployeeRepository extends ServiceEntityRepository
              WHERE v.begin_work_time like :date AND v.end_work_time IS NULL')
             ->setParameter('date', $today . '%')
             ->execute();
-
     }
 }
 
