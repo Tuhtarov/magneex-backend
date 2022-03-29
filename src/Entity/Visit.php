@@ -43,6 +43,48 @@ class Visit
         return $this->end_work_time?->format('H:i:s');
     }
 
+    public function getOverwork(): ?string
+    {
+        if ($this->begin_work_time && $this->end_work_time) {
+            $emp = $this->getEmployee();
+
+            if ($emp && $emp->getJobPosition()) {
+                $beginJob = $emp->getJobPosition()->getBeginWork();
+                $endJob = $emp->getJobPosition()->getEndWork();
+
+                $jobMs = $endJob?->getTimestamp() - $beginJob?->getTimestamp();
+                $workMs = $this->getEndWorkTimeFull()->getTimestamp() - $this->getBeginWorkTimeFull()->getTimestamp();
+
+                if ($beginJob && $workMs > $jobMs) {
+                    $overwork = $workMs - $jobMs;
+
+                    return round($overwork / 60);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public function getTardy(): ?string
+    {
+        if ($this->begin_work_time && $this->end_work_time) {
+            $emp = $this->getEmployee();
+
+            if ($emp && $emp->getJobPosition()) {
+                $beginJob = $emp->getJobPosition()->getBeginWork();
+
+                if ($beginJob) {
+                    $beginWork = DateTime::createFromFormat('Y-m-d H:i:s', $beginJob->format('Y-m-d') . ' ' . $this->getBeginWorkTime());
+
+                    return round(($beginWork->getTimestamp() - $beginJob->getTimestamp()) / 60);
+                }
+            }
+        }
+
+        return null;
+    }
+
     public function getBeginWorkTimeFull(): DateTime
     {
         return $this->begin_work_time;

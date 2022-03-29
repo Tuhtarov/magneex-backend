@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\JobPositionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -24,13 +26,18 @@ class JobPosition
     private $employees;
 
     #[ORM\Column(type: 'time')]
-    private $beginWorkTime;
+    private $beginWork;
 
     #[ORM\Column(type: 'time')]
-    private $endWorkTime;
+    private $endWork;
 
     #[ORM\Column(type: 'integer')]
     private $salary;
+
+    public function __construct()
+    {
+        $this->employees = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -49,35 +56,6 @@ class JobPosition
         return $this;
     }
 
-    public function getBeginWorkTime(): ?string
-    {
-        if ($this->beginWorkTime) {
-            return $this->beginWorkTime->format('H:i');
-        }
-        return null;
-    }
-
-    public function setBeginWorkTime(\DateTimeInterface $beginWorkTime): self
-    {
-        $this->beginWorkTime = $beginWorkTime;
-
-        return $this;
-    }
-
-    public function getEndWorkTime(): ?string
-    {
-        if ($this->endWorkTime) {
-            return $this->endWorkTime->format('H:i');
-        }
-        return null;
-    }
-
-    public function setEndWorkTime(\DateTimeInterface $endWorkTime): self
-    {
-        $this->endWorkTime = $endWorkTime;
-
-        return $this;
-    }
 
     public function getSalary(): ?int
     {
@@ -87,6 +65,60 @@ class JobPosition
     public function setSalary(int $salary): self
     {
         $this->salary = $salary;
+
+        return $this;
+    }
+
+    public function getBeginWork(): ?\DateTimeInterface
+    {
+        return $this->beginWork;
+    }
+
+    public function setBeginWork(\DateTimeInterface $beginWork): self
+    {
+        $this->beginWork = $beginWork;
+
+        return $this;
+    }
+
+    public function getEndWork(): ?\DateTimeInterface
+    {
+        return $this->endWork;
+    }
+
+    public function setEndWork(\DateTimeInterface $endWork): self
+    {
+        $this->endWork = $endWork;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Employee>
+     */
+    public function getEmployees(): Collection
+    {
+        return $this->employees;
+    }
+
+    public function addEmployee(Employee $employee): self
+    {
+        if (!$this->employees->contains($employee)) {
+            $this->employees[] = $employee;
+            $employee->setJobPosition($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEmployee(Employee $employee): self
+    {
+        if ($this->employees->removeElement($employee)) {
+            // set the owning side to null (unless already changed)
+            if ($employee->getJobPosition() === $this) {
+                $employee->setJobPosition(null);
+            }
+        }
 
         return $this;
     }

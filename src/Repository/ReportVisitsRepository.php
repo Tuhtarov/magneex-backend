@@ -4,13 +4,11 @@ namespace App\Repository;
 
 use App\Entity\Employee;
 use App\Entity\JobPosition;
-use App\Entity\People;
 use App\Entity\Visit;
-use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\NativeQuery;
-use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use Psr\Log\LoggerInterface;
 
 /**
  * @method Visit|null find($id, $lockMode = null, $lockVersion = null)
@@ -20,17 +18,15 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ReportVisitsRepository extends VisitRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(private LoggerInterface $logger, ManagerRegistry $registry)
     {
         parent::__construct($registry);
     }
 
-    protected function getRSM(): ResultSetMapping
+    protected function getRSM(): ResultSetMappingBuilder
     {
-        $rsm = new ResultSetMappingBuilder($this->getEntityManager(), ResultSetMappingBuilder::COLUMN_RENAMING_INCREMENT);
-        $rsm->addRootEntityFromClassMetadata(Visit::class, 'v' );
-        $rsm->addJoinedEntityFromClassMetadata(Employee::class, 'e', 'v', 'employee', array('id' => 'employee_id'));
-        $rsm->addJoinedEntityFromClassMetadata(JobPosition::class, 'j', 'e', 'jobPosition', array('id' => 'job_position_id'));
+        $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+        $rsm->addRootEntityFromClassMetadata(Visit::class, 'v');
         return $rsm;
     }
 
@@ -45,14 +41,22 @@ class ReportVisitsRepository extends VisitRepository
 
     private string $SQL_FIND_TARDIES = self::SQL_FIND_BASE
     . ' where v.begin_work_time is not null 
-        and cast(v.begin_work_time as time) > cast(jp.begin_work_time as time)
+        and cast(v.begin_work_time as time) > cast(jp.begin_work as time)
     ';
 
     private string $SQL_FIND_OVERWORKS = self::SQL_FIND_BASE
     . ' where v.begin_work_time is not null and v.end_work_time is not null
-        and cast(v.end_work_time as time) > cast(jp.end_work_time as time)
-        and cast(v.begin_work_time as time) <= cast(jp.begin_work_time as time)
+        and cast(v.end_work_time as time) > cast(jp.end_work as time)
+        and cast(v.begin_work_time as time) <= cast(jp.begin_work as time)
     ';
+
+    private function setFindByEmployee(NativeQuery $q, ?Employee $employee): void
+    {
+        if ($employee) {
+            $q->setSQL($q->getSQL() . ' and e.id = :emp_id');
+            $q->setParameter('emp_id', $employee->getId());
+        }
+    }
 
     /** ------------METHODS------------ */
 
@@ -83,16 +87,7 @@ class ReportVisitsRepository extends VisitRepository
             ->createNativeQuery($this->SQL_FIND_OVERWORKS, $this->getRSM());
 
         $this->setFindByEmployee($query, $employee);
-        $query->disableResultCache();
 
         return $query->getResult();
-    }
-
-    private function setFindByEmployee(NativeQuery $q, ?Employee $employee): void
-    {
-        if ($employee) {
-            $q->setSQL($q->getSQL() . ' and e.id = :emp_id');
-            $q->setParameter('emp_id', $employee->getId());
-        }
     }
 }

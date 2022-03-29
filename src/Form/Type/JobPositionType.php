@@ -21,8 +21,8 @@ class JobPositionType extends AbstractType
     {
         $builder
             ->add('name', TextType::class)
-            ->add('endWorkTime', TimeType::class, self::TIME_FIELD_OPTIONS)
-            ->add('beginWorkTime', TimeType::class, self::TIME_FIELD_OPTIONS)
+            ->add('beginWork', TimeType::class, self::TIME_FIELD_OPTIONS)
+            ->add('endWork', TimeType::class, self::TIME_FIELD_OPTIONS)
             ->add('salary', IntegerType::class);
     }
 

@@ -15,7 +15,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Validator\Constraints\Date;
 
 class AppFixtures extends Fixture
 {
@@ -112,8 +111,8 @@ class AppFixtures extends Fixture
         $beginTime = DateTime::createFromFormat('Y-m-d H:i', '2021-12-25 08:00');
         $endTime = DateTime::createFromFormat('Y-m-d H:i', '2021-12-25 17:00');
 
-        $jobPosition->setBeginWorkTime($beginTime);
-        $jobPosition->setEndWorkTime($endTime);
+        $jobPosition->setBeginWork($beginTime);
+        $jobPosition->setEndWork($endTime);
         $jobPosition->setSalary(random_int(15000, 140000));
 
         $this->saveEntity($jobPosition);

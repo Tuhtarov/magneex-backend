@@ -23,7 +23,6 @@ class VisitController extends AbstractApiController
         return $this->respond(['visits' => $visits]);
     }
 
-
     #[Route('/today-history/{id<\d+>?}', name: 'today_history', methods: ['GET'])]
     public function todayHistory(?Employee $employee): Response
     {

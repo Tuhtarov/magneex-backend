@@ -14,7 +14,7 @@ class ReportController extends AbstractApiController
     {
     }
 
-    // переработки
+    // опоздания
     #[Route('/tardies/{id<\d+>?}', name: 'tardies', methods: ['GET'])]
     public function tardies(?Employee $employee): Response
     {
@@ -25,7 +25,7 @@ class ReportController extends AbstractApiController
         return $this->respond(['tardies' => $tardies]);
     }
 
-    // опоздания
+    // переработки
     #[Route('/overworks/{id<\d+>?}', name: 'overworks', methods: ['GET'])]
     public function overworks(?Employee $employee): Response
     {
